@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+
+    <h2>
+        {{ pageUser.username }}
+
+        <ul class="horizontalList">
+            {% if user.is_staff %}
+            <li>
+                <a href="{% url 'accounts:set_moderator' pageUser.username %}">
+                    {% if pageUser.is_moderator %}
+                        un-mod
+                    {% else %}
+                        mod
+                    {% endif %}
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </h2>
+
+    <p>User since: {{ pageUser.date_joined }} ({{ pageUser.date_joined|naturaltime }})</p>
+
+    {% if user.is_authenticated %}
+        <ul>
+        {% if user.username == pageUser.username %}
+            <li><a href="{% url 'accounts:check_message' %}">See messages</a></li>
+            <li><a href="{% url 'accounts:change_password' %}">change password</a></li>
+        {% else %}
+            <li><a href="{% url 'accounts:send_message' pageUser.username %}">Send private message</a></li>
+        {% endif %}
+        </ul>
+    {% endif %}
+
+
+    <p>
+        Posts: {{ pageUser.posts.count }}
+    </p>
+
+
+{% endblock %}
