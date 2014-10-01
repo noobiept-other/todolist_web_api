@@ -31,19 +31,13 @@ def new_account( request ):
     return render( request, 'accounts/new_account.html', context )
 
 
+@login_required
 def user_page( request, username ):
 
-    userModel = get_user_model()
+    if request.user.username != username:
+        return HttpResponseForbidden( 'Can only open your own user page.' )
 
-    try:
-        user = userModel.objects.get( username= username )
-
-    except userModel.DoesNotExist:
-        raise Http404( "User doesn't exist." )
-
-    context = {
-        'pageUser': user
-    }
+    context = {}
 
     utilities.get_message( request, context )
 
@@ -156,3 +150,11 @@ def password_changed( request ):
     utilities.set_message( request, 'Password changed' )
 
     return HttpResponseRedirect( reverse( 'home' ) )
+
+
+@login_required
+def new_api_key( request ):
+
+    request.user.new_api_key()
+
+    return HttpResponseRedirect( reverse( 'accounts:user_page', args= [ request.user.username ] ) )
