@@ -1,13 +1,6 @@
 from django.contrib import admin
 
-from accounts.models import Account, PrivateMessage
-
-
-class PrivateMessageAdmin( admin.ModelAdmin ):
-
-    list_display = ( 'receiver', 'sender', 'title', 'content' )
-
-admin.site.register( PrivateMessage, PrivateMessageAdmin )
+from accounts.models import Account
 
 
 class AccountAdmin( admin.ModelAdmin ):

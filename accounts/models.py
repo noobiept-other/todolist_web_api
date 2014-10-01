@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.conf import settings
-from django.utils import timezone
 from django.core.urlresolvers import reverse
 
 import uuid
@@ -21,17 +19,3 @@ class Account( AbstractUser ):
         self.save()
 
         return key
-
-class PrivateMessage( models.Model ):
-
-    receiver = models.ForeignKey( settings.AUTH_USER_MODEL )
-    sender = models.ForeignKey( settings.AUTH_USER_MODEL, related_name= 'sender' )
-    title = models.TextField( max_length= 100 )
-    content = models.TextField( max_length= 500 )
-    date_created = models.DateTimeField( help_text= 'Date Created', default= lambda: timezone.localtime( timezone.now() ) )
-
-    def __unicode__(self):
-        return self.title
-
-    def get_url(self):
-        return reverse( 'accounts:open_message', args= [ self.id ] )

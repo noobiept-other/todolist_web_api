@@ -1,3 +1,10 @@
 from django.contrib import admin
 
-# Register your models here.
+from todolist.models import Post
+
+
+class PostAdmin( admin.ModelAdmin ):
+
+    list_display = ( 'pk', 'author', 'text', 'date_created', 'last_updated' )
+
+admin.site.register( Post, PostAdmin )

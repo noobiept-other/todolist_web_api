@@ -1,11 +1,10 @@
-import json
-
 from todolist.models import Post
 
 
 def _post_model_to_dict( post ):
 
     return {
+        'pk': post.pk,
         'text': post.text,
         'author': post.author.username,
         'date_created': post.date_created.strftime( '%d/%m/%Y %H:%M' ),
