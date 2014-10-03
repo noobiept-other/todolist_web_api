@@ -3,17 +3,28 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.shortcuts import render
+from django.contrib.sites.models import Site
+
 from datetime import datetime
 
 from todolist.models import Post
 from todolist.serializers import post_serializer
 from todolist.decorators import post_only
 
-
 @login_required
 def home( request ):
 
     return HttpResponseRedirect( reverse( 'accounts:user_page', args= [ request.user.username ] ) )
+
+
+def show_help( request ):
+
+    context = {
+        'domain': Site.objects.get_current().domain
+    }
+
+    return render( request, 'help.html', context )
 
 
 @csrf_exempt
@@ -52,7 +63,7 @@ def all_posts( request ):
 
     data = post_serializer( posts )
 
-    return JsonResponse( data, safe= False )
+    return JsonResponse( data, safe= False, status= 200 )
 
 
 @csrf_exempt
@@ -71,7 +82,7 @@ def single_post( request ):
 
     data = post_serializer( post )
 
-    return JsonResponse( data )
+    return JsonResponse( data, status= 200 )
 
 
 @csrf_exempt
@@ -118,6 +129,7 @@ def delete_post( request ):
     post.delete()
 
     return JsonResponse( {}, status= 204 )
+
 
 
 

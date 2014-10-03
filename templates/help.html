@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>API help</h1>
+
+<p>
+    First create an account, and get the API key in your user page.
+</p>
+<p>
+    Then you need to make a POST request to the appropriate url, with the necessary arguments.
+</p>
+<p>
+    It will return a 405 code (method not allowed) if its not a POST request.
+</p>
+
+
+<h3>Urls</h3>
+
+<ul>
+    <li><a href="#Add">{{ domain }}/v1/post/add</a></li>
+    <li><a href="#All">{{ domain }}/v1/post/all</a></li>
+    <li><a href="#Get">{{ domain }}/v1/post/get</a></li>
+    <li><a href="#Update">{{ domain }}/v1/post/update</a></li>
+    <li><a href="#Delete">{{ domain }}/v1/post/delete</a></li>
+</ul>
+
+
+<h4 id="Add">{{ domain }}/v1/post/add</h4>
+
+<p>
+    Adds a post.
+</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>text</td>
+        <td>The content of the post to be added.</td>
+    </tr>
+</table>
+    <table>
+        <tr>
+            <th>response</th>
+            <th>object returned</th>
+            <th>status code</th>
+        </tr>
+        <tr>
+            <td>success</td>
+            <td>{}</td>
+            <td>201 (success/created)</td>
+        </tr>
+        <tr>
+            <td>failure</td>
+            <td>{ "reason": "the reason here" }</td>
+            <td>400 (bad request)</td>
+        </tr>
+    </table>
+
+<a href="#Menu">top</a>
+
+
+<h4 id="All">{{ domain }}/v1/post/all</h4>
+
+<p>
+    Get all the posts.
+</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+</table>
+    <table>
+        <tr>
+            <th>response</th>
+            <th>object returned</th>
+            <th>status code</th>
+        </tr>
+        <tr>
+            <td>success</td>
+            <td>[ { "pk": int, "text": str, "author": str, "date_created": str, "last_updated": str }, ... ]</td>
+            <td>200 (success/ok)</td>
+        </tr>
+        <tr>
+            <td>failure</td>
+            <td>{ "reason": "the reason here" }</td>
+            <td>400 (bad request)</td>
+        </tr>
+    </table>
+
+<a href="#Menu">top</a>
+
+
+<h4 id="Get">{{ domain }}/v1/post/get</h4>
+
+<p>
+    Get a single post.
+</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>pk</td>
+        <td>The post identifier.</td>
+    </tr>
+</table>
+    <table>
+        <tr>
+            <th>response</th>
+            <th>object returned</th>
+            <th>status code</th>
+        </tr>
+        <tr>
+            <td>success</td>
+            <td>{ "pk": int, "text": str, "author": str, "date_created": str, "last_updated": str }</td>
+            <td>200 (success/ok)</td>
+        </tr>
+        <tr>
+            <td>failure</td>
+            <td>{ "reason": "the reason here" }</td>
+            <td>400 (bad request)</td>
+        </tr>
+    </table>
+
+<a href="#Menu">top</a>
+
+
+<h4 id="Update">{{ domain }}/v1/post/update</h4>
+
+<p>
+    Update a post's text.
+</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>pk</td>
+        <td>The post identifier.</td>
+    </tr>
+    <tr>
+        <td>text</td>
+        <td>The new content to be replaced.</td>
+    </tr>
+</table>
+    <table>
+        <tr>
+            <th>response</th>
+            <th>object returned</th>
+            <th>status code</th>
+        </tr>
+        <tr>
+            <td>success</td>
+            <td>{}</td>
+            <td>200 (success/ok)</td>
+        </tr>
+        <tr>
+            <td>failure</td>
+            <td>{ "reason": "the reason here" }</td>
+            <td>400 (bad request)</td>
+        </tr>
+    </table>
+
+<a href="#Menu">top</a>
+
+
+<h4 id="Delete">{{ domain }}/v1/post/delete</h4>
+
+<p>
+    Delete a post.
+</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>pk</td>
+        <td>The post identifier.</td>
+    </tr>
+</table>
+    <table>
+        <tr>
+            <th>response</th>
+            <th>object returned</th>
+            <th>status code</th>
+        </tr>
+        <tr>
+            <td>success</td>
+            <td>{}</td>
+            <td>204 (no content)</td>
+        </tr>
+        <tr>
+            <td>failure</td>
+            <td>{ "reason": "the reason here" }</td>
+            <td>400 (bad request)</td>
+        </tr>
+    </table>
+
+<a href="#Menu">top</a>
+
+{% endblock %}
