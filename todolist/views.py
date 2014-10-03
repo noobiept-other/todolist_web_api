@@ -46,7 +46,7 @@ def add_post( request ):
     post = Post( text= text, author= user )
     post.save()
 
-    return JsonResponse( {}, status= 201 )
+    return JsonResponse( { 'pk': post.pk }, status= 201 )
 
 
 
