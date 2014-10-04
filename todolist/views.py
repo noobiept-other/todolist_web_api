@@ -5,8 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.contrib.sites.models import Site
-
-from datetime import datetime
+from django.utils import timezone
 
 from todolist.models import Post
 from todolist.serializers import post_serializer
@@ -105,7 +104,7 @@ def update_post( request ):
     except KeyError:
         return JsonResponse( { 'reason': "Need a 'text' argument." }, status= 400 )
 
-    post.last_updated = datetime.now()
+    post.last_updated = timezone.now()
     post.text = text
     post.save( update_fields= [ 'last_updated', 'text' ] )
 
@@ -128,7 +127,7 @@ def delete_post( request ):
 
     post.delete()
 
-    return JsonResponse( {}, status= 204 )
+    return JsonResponse( {}, status= 200 )
 
 
 
