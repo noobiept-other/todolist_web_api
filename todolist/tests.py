@@ -35,6 +35,33 @@ class TodolistTest( TestCase ):
         return json.loads( response.content.decode( encoding= 'utf-8' ) )
 
 
+    def test_add_bad_request(self):
+        """
+            Call with missing/wrong arguments to test if it is returned with status code of 400 (bad request)
+        """
+
+            # no arguments
+        response = self.client.post( self.add_url )
+
+        self.assertEqual( response.status_code, 400 )
+
+            # invalid 'api_key'
+        response = self.client.post( self.add_url,
+            {
+                'api_key': 'random'
+            })
+
+        self.assertEqual( response.status_code, 400 )
+
+            # missing 'text' argument
+        response = self.client.post( self.add_url,
+            {
+                'api_key': self.api_key
+            })
+
+        self.assertEqual( response.status_code, 400 )
+
+
     def test_add(self):
 
         text = 'test'
@@ -50,6 +77,48 @@ class TodolistTest( TestCase ):
             })
 
         self.assertEqual( getResponse[ 'text' ], text )
+
+
+    def test_update_bad_request(self):
+
+        addResponse = self.make_request( self.add_url,
+            {
+                'text': 'test'
+            })
+        pk = addResponse[ 'pk' ]
+
+
+            # no arguments
+        response = self.client.post( self.update_url )
+
+        self.assertEqual( response.status_code, 400 )
+
+            # invalid 'api_key'
+        response = self.client.post( self.update_url,
+            {
+                'api_key': 'random'
+            })
+
+        self.assertEqual( response.status_code, 400 )
+
+            # missing 'pk'
+
+        response = self.client.post( self.update_url,
+            {
+                'api_key': self.api_key
+            })
+
+        self.assertEqual( response.status_code, 400 )
+
+            # missing 'text'
+
+        response = self.client.post( self.update_url,
+            {
+                'api_key': self.api_key,
+                'pk': pk
+            })
+
+        self.assertEqual( response.status_code, 400 )
 
 
     def test_update(self):
@@ -76,6 +145,22 @@ class TodolistTest( TestCase ):
         self.assertEqual( getResponse[ 'text' ], updated_text )
 
 
+    def test_all_bad_request(self):
+
+            # missing 'api_key'
+        response = self.client.post( self.all_url )
+
+        self.assertEqual( response.status_code, 400 )
+
+            # invalid 'api_key'
+        response = self.client.post( self.all_url,
+            {
+                'api_key': 'random'
+            })
+
+        self.assertEqual( response.status_code, 400 )
+
+
     def test_all(self):
 
         allResponse = self.make_request( self.all_url, {} )
@@ -93,6 +178,30 @@ class TodolistTest( TestCase ):
         allResponse = self.make_request( self.all_url, {} )
 
         self.assertEqual( len( allResponse ), count )
+
+
+    def test_delete_bad_request(self):
+
+            # no arguments
+        response = self.client.post( self.delete_url )
+
+        self.assertEqual( response.status_code, 400 )
+
+            # invalid 'api_key'
+        response = self.client.post( self.delete_url,
+            {
+                'api_key': 'random'
+            })
+
+        self.assertEqual( response.status_code, 400 )
+
+            # missing 'pk'
+        response = self.client.post( self.delete_url,
+            {
+                'api_key': self.api_key
+            })
+
+        self.assertEqual( response.status_code, 400 )
 
 
     def test_delete(self):

@@ -36,7 +36,7 @@ def add_post( request ):
         return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
 
     try:
-        text = request.POST.get( 'text', '' )
+        text = request.POST[ 'text' ]
 
     except KeyError:
         return JsonResponse( { 'reason': "Need 'text' argument." }, status= 400 )
