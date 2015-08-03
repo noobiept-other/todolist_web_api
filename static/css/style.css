@@ -1,7 +1,32 @@
+    /* Basic Elements */
+
+body
+    {
+    font-size: 24px;
+    }
+
+em
+    {
+    font-weight: bold;
+    font-style: normal;
+    }
+
+
+    /* Top Menu */
+
+#Menu ul
+    {
+    display: block;
+    margin: 15px;
+    }
+
 #Message
     {
     background-color: rgba(201, 219, 237, 0.83);
     }
+
+
+    /* Generic Classes */
 
 .horizontalList
     {
@@ -16,27 +41,79 @@
     display: inline-block;
     }
 
-h1
+.red
     {
-    background-color: rgba(129, 199, 255, 0.61);
+    color: red;
     }
 
-h4
+.Accounts-disabled
     {
-    background-color: rgba(148, 217, 255, 0.61);
+    color: gray;
+    text-decoration: underline;
     }
 
-h1, h4
+.Accounts-moderator
     {
-    padding: 0 10px;
+    color: green;
+    font-weight: bold;
+    text-decoration: underline;
     }
 
-table th
+.Accounts-staff
     {
-    background-color: rgba(139, 62, 59, 0.29);
+    color: brown;
+    font-weight: bold;
+    text-decoration: underline;
     }
 
-td, th
+.clickableRow
     {
-    padding: 0 5px;
+    cursor: pointer;
+    }
+
+.tooltip
+    {
+    position: absolute;
+    min-width: 100px;
+    background-color: white;
+    border-radius: 3px;
+    box-shadow: 0 0 10px 0;
+    padding: 5px;
+    }
+
+.SortTable-sortable
+    {
+    color: rgb(0, 0, 255);
+    cursor: pointer;
+    }
+
+.SortTable-sortable:hover
+    {
+    text-decoration: underline;
+    }
+
+
+    /* Accounts/User Page */
+
+#CheckMessagesTable tr:nth-child(even)
+    {
+    background-color: #e6edeb;
+    }
+
+#CheckMessagesTable td
+    {
+    padding: 5px;
+    min-width: 200px;
+    position: relative;
+    }
+
+#CheckMessagesTable td:last-child
+    {
+    min-width: 10px;
+    }
+
+#PrivateMessage-title
+    {
+    background-color: aliceblue;
+    text-align: center;
     }

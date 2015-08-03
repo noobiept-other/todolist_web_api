@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
+
 class FixUserCreationForm( UserCreationForm ):
     """
         The django form has the User hard-coded (so doesn't work with custom user models)
@@ -12,7 +13,6 @@ class FixUserCreationForm( UserCreationForm ):
     def clean_username(self):
 
         userModel = get_user_model()
-
         username = self.cleaned_data[ "username" ]
 
         try:
@@ -20,7 +20,8 @@ class FixUserCreationForm( UserCreationForm ):
 
         except userModel.DoesNotExist:
             return username
-        raise forms.ValidationError(self.error_messages['duplicate_username'])
+
+        raise forms.ValidationError( self.error_messages[ 'duplicate_username' ] )
 
 
 class MyUserCreationForm( FixUserCreationForm ):
@@ -33,11 +34,9 @@ class MyUserCreationForm( FixUserCreationForm ):
         fields = ( 'username', 'email', 'password1', 'password2' )
 
     def clean_email( self ):
-
         """
             Check if there's already an user with that email
         """
-
         userModel = get_user_model()
         email = self.cleaned_data[ 'email' ]
 
@@ -45,13 +44,10 @@ class MyUserCreationForm( FixUserCreationForm ):
             userModel.objects.get( email= email )
 
         except userModel.DoesNotExist:
-
             return email
 
         else:
             raise ValidationError( 'An account with that email already exists.' )
-
-
 
     def save( self, commit= True ):
 

@@ -1,9 +1,11 @@
 {% load static %}
+{% load accounts %}
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hi</title>
+    <meta charset="utf-8" />
+    <title>Todolist Web Api</title>
 
     {% block scripts %}{% endblock %}
 
@@ -12,20 +14,20 @@
 <body>
 
 <div id="Menu">
-    <a href="{% url 'home' %}">Home</a>
-
-    {% if user.is_authenticated %}
-        <a href="{% url 'accounts:user_page' user.username %}">{{ user.username }}</a>
-        <a href="{% url 'accounts:logout' %}?next={{ request.get_full_path|urlencode }}">logout</a>
-    {% else %}
-        <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}">login</a>
-    {% endif %}
-
-    <a href="{% url 'help' %}">help</a>
+    <ul class="horizontalList">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li>
+        {% if user.is_authenticated %}
+            {{ user|account_name }} ( <a href="{% url 'accounts:logout' %}?next={{ request.get_full_path|urlencode }}">logout</a> )
+        {% else %}
+            <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}">login</a>
+        {% endif %}
+        </li>
+    </ul>
 </div>
 
-{% if message %}
-    <p id="Message">{{ message }}</p>
+{% if MESSAGE %}
+    <p id="Message">{{ MESSAGE }}</p>
 {% endif %}
 
 {% block content %}{% endblock %}

@@ -1,24 +1,45 @@
 {% extends "base.html" %}
 {% load humanize %}
+{% load accounts %}
 
 {% block content %}
 
-    <h2>{{ user.username }}</h2>
+    <h2>
+        {{ pageUser|account_name }}
 
-    <p>User since: {{ user.date_joined }} ({{ user.date_joined|naturaltime }})</p>
+        {% if user.is_staff %}
+        <ul class="horizontalList">
+            <li>
+                <a href="{% url 'accounts:disable_confirm' pageUser.username %}">
+                    {% if pageUser.is_active %}
+                        disable
+                    {% else %}
+                        enable
+                    {% endif %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accounts:remove_confirm' pageUser.username %}">remove</a>
+            </li>
+        </ul>
+        {% endif %}
+    </h2>
+
+    <p>User since: {{ pageUser.date_joined }} ({{ pageUser.date_joined|naturaltime }})</p>
 
     <p>
-        API key: {{ user.api_key }}
+        Posts: {{ pageUser.posts.count }}
     </p>
 
-    <ul>
-        <li><a href="{% url 'accounts:change_password' %}">change password</a></li>
-        <li><a href="{% url 'accounts:new_api_key' %}">new api key</a></li>
-    </ul>
+    {% if pageUser.username == user.username %}
+        <p>
+            API key: {{ user.api_key }}
+        </p>
 
-    <p>
-        Posts: {{ user.posts.count }}
-    </p>
-
+        <ul>
+            <li><a href="{% url 'accounts:change_password' %}">change password</a></li>
+            <li><a href="{% url 'accounts:new_api_key' %}">new api key</a></li>
+        </ul>
+    {% endif %}
 
 {% endblock %}

@@ -4,10 +4,10 @@ from django.core.urlresolvers import reverse
 
 import uuid
 
+
 class Account( AbstractUser ):
 
-    is_moderator = models.BooleanField( default= False )
-    api_key = models.CharField( max_length= 36, unique= True, default= uuid.uuid4 )
+    api_key = models.UUIDField( unique= True, default= uuid.uuid4 )
 
     def get_url(self):
         return reverse( 'accounts:user_page', args= [ self.username ] )
@@ -19,3 +19,6 @@ class Account( AbstractUser ):
         self.save()
 
         return key
+
+    def __str__(self):
+        return self.username
