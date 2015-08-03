@@ -4,7 +4,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
-from django.contrib.sites.models import Site
 from django.utils import timezone
 
 from todolist.models import Post
@@ -20,7 +19,7 @@ def home( request ):
 def show_help( request ):
 
     context = {
-        'domain': Site.objects.get_current().domain
+        'domain': request.get_host()
     }
 
     return render( request, 'help.html', context )

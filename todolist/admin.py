@@ -5,6 +5,6 @@ from todolist.models import Post
 
 class PostAdmin( admin.ModelAdmin ):
 
-    list_display = ( 'pk', 'author', 'text', 'date_created', 'last_updated' )
+    list_display = ( 'pk', 'author', 'text', 'last_updated' )
 
 admin.site.register( Post, PostAdmin )

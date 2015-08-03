@@ -12,7 +12,7 @@ import accounts.urls
 
 urlpatterns = [
 
-    url( '^$', todolist.views.home, name= 'home' ),   #HERE
+    url( '^$', todolist.views.home, name= 'home' ),
 
     url( r'^', include( todolist.urls ) ),
     url( r'^accounts/', include( accounts.urls, namespace= 'accounts', app_name= 'accounts' ) ),

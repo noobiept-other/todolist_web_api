@@ -7,7 +7,6 @@ def _post_model_to_dict( post ):
         'pk': post.pk,
         'text': post.text,
         'author': post.author.username,
-        'date_created': post.date_created.strftime( '%d/%m/%Y %H:%M' ),
         'last_updated': post.last_updated.strftime( '%d/%m/%Y %H:%M' )
     }
 
