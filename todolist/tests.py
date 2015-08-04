@@ -73,7 +73,7 @@ class TodolistTest( TestCase ):
 
         getResponse = self.make_request( self.get_url,
             {
-                'pk': addResponse[ 'pk' ]
+                'id': addResponse[ 'id' ]
             })
 
         self.assertEqual( getResponse[ 'text' ], text )
@@ -85,7 +85,7 @@ class TodolistTest( TestCase ):
             {
                 'text': 'test'
             })
-        pk = addResponse[ 'pk' ]
+        postId = addResponse[ 'id' ]
 
 
             # no arguments
@@ -101,7 +101,7 @@ class TodolistTest( TestCase ):
 
         self.assertEqual( response.status_code, 400 )
 
-            # missing 'pk'
+            # missing 'id'
 
         response = self.client.post( self.update_url,
             {
@@ -115,7 +115,7 @@ class TodolistTest( TestCase ):
         response = self.client.post( self.update_url,
             {
                 'api_key': self.api_key,
-                'pk': pk
+                'id': postId
             })
 
         self.assertEqual( response.status_code, 400 )
@@ -134,12 +134,12 @@ class TodolistTest( TestCase ):
         self.make_request( self.update_url,
             {
                 'text': updated_text,
-                'pk': addResponse[ 'pk' ]
+                'id': addResponse[ 'id' ]
             })
 
         getResponse = self.make_request( self.get_url,
             {
-                'pk': addResponse[ 'pk' ]
+                'id': addResponse[ 'id' ]
             })
 
         self.assertEqual( getResponse[ 'text' ], updated_text )
@@ -195,7 +195,7 @@ class TodolistTest( TestCase ):
 
         self.assertEqual( response.status_code, 400 )
 
-            # missing 'pk'
+            # missing 'id'
         response = self.client.post( self.delete_url,
             {
                 'api_key': self.api_key
@@ -213,7 +213,7 @@ class TodolistTest( TestCase ):
 
         self.make_request( self.delete_url,
             {
-                'pk': addResponse[ 'pk' ]
+                'id': addResponse[ 'id' ]
             })
 
         allResponse = self.make_request( self.all_url, {} )

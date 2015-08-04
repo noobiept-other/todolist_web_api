@@ -44,7 +44,7 @@ def add_post( request ):
     post = Post( text= text, author= user )
     post.save()
 
-    return JsonResponse( { 'pk': post.pk }, status= 201 )
+    return JsonResponse( { 'id': post.pk }, status= 201 )
 
 
 
@@ -76,7 +76,7 @@ def single_post( request ):
     post = _get_post( request, user )
 
     if not post:
-        return JsonResponse( { 'reason': "Missing/invalid 'pk' argument." }, status= 400 )
+        return JsonResponse( { 'reason': "Missing/invalid 'id' argument." }, status= 400 )
 
     data = post_serializer( post )
 
@@ -95,7 +95,7 @@ def update_post( request ):
     post = _get_post( request, user )
 
     if not post:
-        return JsonResponse( { 'reason': "Missing/invalid 'pk' argument." }, status= 400 )
+        return JsonResponse( { 'reason': "Missing/invalid 'id' argument." }, status= 400 )
 
     try:
         text = request.POST[ 'text' ]
@@ -122,7 +122,7 @@ def delete_post( request ):
     post = _get_post( request, user )
 
     if not post:
-        return JsonResponse( { 'reason': "Missing/invalid 'pk' argument." }, status= 400 )
+        return JsonResponse( { 'reason': "Missing/invalid 'id' argument." }, status= 400 )
 
     post.delete()
 
@@ -144,7 +144,7 @@ def _get_user( request ):
     try:
         user = userModel.objects.get( api_key= key )
 
-    except userModel.DoesNotExist:
+    except (userModel.DoesNotExist, ValueError):
         return None
 
     return user
@@ -153,13 +153,13 @@ def _get_user( request ):
 def _get_post( request, user ):
 
     try:
-        pk = request.POST[ 'pk' ]
+        postId = request.POST[ 'id' ]
 
     except KeyError:
         return None
 
     try:
-        post = user.posts.get( pk= pk )
+        post = user.posts.get( pk= postId )
 
     except Post.DoesNotExist:
         return None

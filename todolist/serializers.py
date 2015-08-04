@@ -4,7 +4,7 @@ from todolist.models import Post
 def _post_model_to_dict( post ):
 
     return {
-        'pk': post.pk,
+        'id': post.pk,
         'text': post.text,
         'author': post.author.username,
         'last_updated': post.last_updated.strftime( '%d/%m/%Y %H:%M' )
