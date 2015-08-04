@@ -16,7 +16,7 @@ class Account( AbstractUser ):
         key = uuid.uuid4()
 
         self.api_key = key
-        self.save()
+        self.save( update_fields= [ 'api_key' ] )
 
         return key
 
