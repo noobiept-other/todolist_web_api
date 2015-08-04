@@ -32,29 +32,45 @@ def show_help( request ):
 
 @csrf_exempt
 @post_only
-def add_post( request ):
+def add( request ):
     """
-        Add a post.
+        Add a single or multiple new posts.
 
-        Requires an 'api_key' and a 'text' variable sent in the post request.
-        returned = { 'id': int }
+        Variables required in the post request:
+            - api_key : User identifier.
+            - text    : The text string of a single post.
+            - text[]  : A list of strings, of the posts to be added.
+        Send either "text" (to add a single post) or "text[]" (multiple posts).
+
+        return_single_post = { 'id': int }
+        return_multiple_posts = { 'ids': int[] }
     """
     user = _get_user( request )
 
     if not user:
         return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
 
-    try:
-        text = request.POST[ 'text' ]
+    text = request.POST.get( 'text' )
 
-    except KeyError:
-        return JsonResponse( { 'reason': "Need 'text' argument." }, status= 400 )
+    if text:
+        post = Post.objects.create( text= text, author= user )
 
+        return JsonResponse( { 'id': post.pk }, status= 201 )
 
-    post = Post( text= text, author= user )
-    post.save()
+    else:
+        textList = request.POST.getlist( 'text[]' )
 
-    return JsonResponse( { 'id': post.pk }, status= 201 )
+        if len( textList ) == 0:
+            return JsonResponse( { 'reason': "Need 'text' or 'text[]' argument." }, status= 400 )
+
+        ids = []
+
+        for text in textList:
+            post = Post.objects.create( text= text, author= user )
+
+            ids.append( post.pk )
+
+        return JsonResponse( { 'ids': ids }, status= 201 )
 
 
 @csrf_exempt

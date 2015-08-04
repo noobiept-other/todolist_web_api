@@ -10,9 +10,16 @@
 <p>
     Then you need to make a POST request to the appropriate url, with the necessary arguments.
 </p>
-<p>
-    It will return a 405 code (method not allowed) if its not a POST request.
-</p>
+
+<h3>Return codes</h3>
+<ul>
+    <li>405 (method not allowed): if its not a POST request.</li>
+    <li>400 (bad request): if its missing some arguments (or are invalid).</li>
+    <li>201 (created): if a post was successfully created.</li>
+    <li>200 (OK): if everything worked as expected.</li>
+</ul>
+
+
 
 
 <ul>
@@ -27,7 +34,9 @@
 <h4 id="Add">{{ domain }}/v1/post/add</h4>
 
     <p>
-        Adds a post.
+        Add a single or multiple new posts.
+
+        Send either "text" (to add a single post) or "text[]" (multiple posts).
     </p>
     <table>
         <tr>
@@ -40,7 +49,11 @@
         </tr>
         <tr>
             <td>text</td>
-            <td>The content of the post to be added.</td>
+            <td>The text string of a single post.</td>
+        </tr>
+        <tr>
+            <td>text[]</td>
+            <td>A list of strings, of the posts to be added.</td>
         </tr>
     </table>
     <br />
@@ -51,8 +64,13 @@
             <th>status code</th>
         </tr>
         <tr>
-            <td>success</td>
+            <td>single post success</td>
             <td>{ "id": int }</td>
+            <td>201 (success/created)</td>
+        </tr>
+        <tr>
+            <td>multiple posts success</td>
+            <td>{ "ids": int[] }</td>
             <td>201 (success/created)</td>
         </tr>
         <tr>

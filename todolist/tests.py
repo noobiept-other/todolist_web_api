@@ -19,11 +19,12 @@ class TodolistTest( TestCase ):
         self.client = Client()
 
             # get the api's urls
-        self.add_url = reverse( views.add_post )
+        self.add_url = reverse( views.add )
         self.all_url = reverse( views.all_posts )
         self.get_url = reverse( views.single_post )
         self.update_url = reverse( views.update_post )
         self.delete_url = reverse( views.delete_post )
+
 
     def make_request(self, url, arguments):
 
@@ -42,7 +43,6 @@ class TodolistTest( TestCase ):
 
             # no arguments
         response = self.client.post( self.add_url )
-
         self.assertEqual( response.status_code, 400 )
 
             # invalid 'api_key'
@@ -50,33 +50,37 @@ class TodolistTest( TestCase ):
             {
                 'api_key': 'random'
             })
-
         self.assertEqual( response.status_code, 400 )
 
-            # missing 'text' argument
+            # missing 'text' and 'text[]' argument
         response = self.client.post( self.add_url,
             {
                 'api_key': self.api_key
             })
-
         self.assertEqual( response.status_code, 400 )
 
 
     def test_add(self):
+        """
+            Test the addition of posts to the list.
+        """
+        text1 = 'one'
+        text2 = 'two'
 
-        text = 'test'
+            # add single post
+        addResponse = self.make_request( self.add_url, { 'text': text1 })
+        getResponse = self.make_request( self.get_url, { 'id': addResponse[ 'id' ] })
 
-        addResponse = self.make_request( self.add_url,
-            {
-                'text': text
-            })
+        self.assertEqual( getResponse[ 'text' ], text1 )
 
-        getResponse = self.make_request( self.get_url,
-            {
-                'id': addResponse[ 'id' ]
-            })
+            # add multiple posts
+        addResponse = self.make_request( self.add_url, { 'text[]': [ text1, text2 ] })
 
-        self.assertEqual( getResponse[ 'text' ], text )
+        response1 = self.make_request( self.get_url, { 'id': addResponse[ 'ids' ][ 0 ] })
+        response2 = self.make_request( self.get_url, { 'id': addResponse[ 'ids' ][ 1 ] })
+
+        self.assertEqual( response1[ 'text' ], text1 )
+        self.assertEqual( response2[ 'text' ], text2 )
 
 
     def test_update_bad_request(self):
