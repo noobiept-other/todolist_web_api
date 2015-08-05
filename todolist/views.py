@@ -34,13 +34,13 @@ def add( request ):
     """
     user = _get_user( request )
 
-    if not user:
-        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
+    if isinstance( user, HttpResponse ):
+        return user
 
-    text = request.POST.get( 'text' )
+    text = _get_text( request )
 
-    if not text:
-        return HttpResponseBadRequest( "Need 'text' argument." )
+    if isinstance( text, HttpResponse ):
+        return text
 
     post = Post.objects.create( text= text, author= user )
 
@@ -61,13 +61,13 @@ def add_multiple( request ):
     """
     user = _get_user( request )
 
-    if not user:
-        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
+    if isinstance( user, HttpResponse ):
+        return user
 
-    textList = request.POST.getlist( 'text[]' )
+    textList = _get_text_list( request )
 
-    if len( textList ) == 0:
-        return HttpResponseBadRequest( "Need 'text[]' argument." )
+    if isinstance( textList, HttpResponse ):
+        return textList
 
     ids = []
 
@@ -96,15 +96,10 @@ def get( request ):
             'last_updated': str
         }
     """
-    user = _get_user( request )
+    post = _get_post( request )
 
-    if not user:
-        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
-
-    post = _get_post( request, user )
-
-    if not post:
-        return HttpResponseBadRequest( "Missing/invalid 'id' argument." )
+    if isinstance( post, HttpResponse ):
+        return post
 
     data = post_serializer( post )
 
@@ -133,15 +128,10 @@ def get_multiple( request ):
             ]
         }
     """
-    user = _get_user( request )
+    posts = _get_posts( request )
 
-    if not user:
-        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
-
-    posts = _get_posts( request, user )
-
-    if not posts:
-        return HttpResponseBadRequest( "Missing/invalid 'id[]' argument." )
+    if isinstance( posts, HttpResponse ):
+        return posts
 
     data = post_serializer( posts )
 
@@ -171,8 +161,8 @@ def get_all( request ):
     """
     user = _get_user( request )
 
-    if not user:
-        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
+    if isinstance( user, HttpResponse ):
+        return user
 
     posts = user.posts.all()
     data = post_serializer( posts )
@@ -191,21 +181,15 @@ def update( request ):
             - id      : Post identifier.
             - text    : The new text of the post.
     """
-    user = _get_user( request )
+    post = _get_post( request )
 
-    if not user:
-        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
+    if isinstance( post, HttpResponse ):
+        return post
 
-    post = _get_post( request, user )
+    text = _get_text( request )
 
-    if not post:
-        return HttpResponseBadRequest( "Missing/invalid 'id' argument." )
-
-    try:
-        text = request.POST[ 'text' ]
-
-    except KeyError:
-        return HttpResponseBadRequest( "Need a 'text' argument." )
+    if isinstance( text, HttpResponse ):
+        return text
 
     post.last_updated = timezone.now()
     post.text = text
@@ -225,20 +209,15 @@ def update_multiple( request ):
             - id[]    : A list with the posts identifiers.
             - text[]  : A list with the new text for each post. The text must have the same position as in the id list.
     """
-    user = _get_user( request )
+    posts = _get_posts( request )
 
-    if not user:
-        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
+    if isinstance( posts, HttpResponse ):
+        return posts
 
-    posts = _get_posts( request, user )
+    texts = _get_text_list( request )
 
-    if not posts:
-        return HttpResponseBadRequest( "Missing/invalid 'id[]' argument." )
-
-    texts = request.POST.getlist( 'text[]' )
-
-    if len( texts ) == 0:
-        return HttpResponseBadRequest( "Missing/invalid 'text[]' argument." )
+    if isinstance( texts, HttpResponse ):
+        return texts
 
     now = timezone.now()
 
@@ -267,15 +246,10 @@ def delete( request ):
             - api_key : User identifier.
             - id      : Post identifier.
     """
-    user = _get_user( request )
+    post = _get_post( request )
 
-    if not user:
-        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
-
-    post = _get_post( request, user )
-
-    if not post:
-        return HttpResponseBadRequest( "Missing/invalid 'id' argument." )
+    if isinstance( post, HttpResponse ):
+        return post
 
     post.delete()
 
@@ -292,15 +266,10 @@ def delete_multiple( request ):
             - api_key : User identifier.
             - id[]    : A list with the posts identifiers.
     """
-    user = _get_user( request )
+    posts = _get_posts( request )
 
-    if not user:
-        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
-
-    posts = _get_posts( request, user )
-
-    if not posts:
-        return HttpResponseBadRequest( "Missing/invalid 'id[]' argument." )
+    if isinstance( posts, HttpResponse ):
+        return posts
 
     posts.delete()
 
@@ -318,8 +287,8 @@ def delete_all( request ):
     """
     user = _get_user( request )
 
-    if not user:
-        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
+    if isinstance( user, HttpResponse ):
+        return user
 
     user.posts.all().delete()
 
@@ -329,6 +298,7 @@ def delete_all( request ):
 def _get_user( request ):
     """
         Get the corresponding user model, of the given 'api_key'.
+        Returns an 'HttpResponseBadRequest' if something went wrong.
     """
     userModel = get_user_model()
 
@@ -336,48 +306,84 @@ def _get_user( request ):
         key = request.POST[ 'api_key' ]
 
     except KeyError:
-        return None
+        return HttpResponseBadRequest( "Missing 'api_key' argument." )
 
     try:
         user = userModel.objects.get( api_key= key )
 
     except (userModel.DoesNotExist, ValueError):
-        return None
+        return HttpResponseBadRequest( "Invalid 'api_key' argument." )
 
     return user
 
 
-def _get_post( request, user ):
+def _get_text( request ):
+    """
+        Get the 'text' variable from the POST request.
+        Returns an 'HttpResponseBadRequest' if something went wrong.
+    """
+    text = request.POST.get( 'text' )
+
+    if not text:
+        return HttpResponseBadRequest( "Need 'text' argument." )
+
+    return text
+
+
+def _get_text_list( request ):
+    """
+        Get the 'text[]' list from the POST request.
+        Returns an 'HttpResponseBadRequest' if something went wrong.
+    """
+    textList = request.POST.getlist( 'text[]' )
+
+    if len( textList ) == 0:
+        return HttpResponseBadRequest( "Need 'text[]' argument." )
+
+    return textList
+
+
+def _get_post( request ):
     """
         Get the post model object of the given 'id'.
+        Returns an 'HttpResponseBadRequest' if something went wrong.
     """
-    try:
-        postId = request.POST[ 'id' ]
+    user = _get_user( request )
 
-    except KeyError:
-        return None
+    if isinstance( user, HttpResponse ):
+        return user
+
+    postId = request.POST.get( 'id' )
+
+    if not postId:
+        return HttpResponseBadRequest( "Missing 'id' argument." )
 
     try:
         post = user.posts.get( pk= postId )
 
     except Post.DoesNotExist:
-        return None
+        return HttpResponseBadRequest( "Invalid 'id' argument." )
 
     return post
 
 
-def _get_posts( request, user ):
+def _get_posts( request ):
     """
         Get the posts model objects given a list of ids.
     """
+    user = _get_user( request )
+
+    if isinstance( user, HttpResponse ):
+        return user
+
     ids = request.POST.getlist( 'id[]' )
 
     if len( ids ) == 0:
-        return None
+        return HttpResponseBadRequest( "Missing 'id[]' argument." )
 
     posts = user.posts.filter( pk__in= ids )
 
     if not posts:
-        return None
+        return HttpResponseBadRequest( "Invalid 'id[]' argument." )
 
     return posts
