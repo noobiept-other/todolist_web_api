@@ -1,7 +1,5 @@
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
-from django.core.urlresolvers import reverse
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.utils import timezone
@@ -37,12 +35,12 @@ def add( request ):
     user = _get_user( request )
 
     if not user:
-        return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
 
     text = request.POST.get( 'text' )
 
     if not text:
-        return JsonResponse( { 'reason': "Need 'text' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Need 'text' argument." )
 
     post = Post.objects.create( text= text, author= user )
 
@@ -64,12 +62,12 @@ def add_multiple( request ):
     user = _get_user( request )
 
     if not user:
-        return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
 
     textList = request.POST.getlist( 'text[]' )
 
     if len( textList ) == 0:
-        return JsonResponse( { 'reason': "Need 'text[]' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Need 'text[]' argument." )
 
     ids = []
 
@@ -101,12 +99,12 @@ def get( request ):
     user = _get_user( request )
 
     if not user:
-        return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
 
     post = _get_post( request, user )
 
     if not post:
-        return JsonResponse( { 'reason': "Missing/invalid 'id' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'id' argument." )
 
     data = post_serializer( post )
 
@@ -130,19 +128,20 @@ def get_multiple( request ):
                     'text': str,
                     'author': str,
                     'last_updated': str
-                }
+                },
+                # (...)
             ]
         }
     """
     user = _get_user( request )
 
     if not user:
-        return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
 
     posts = _get_posts( request, user )
 
     if not posts:
-        return JsonResponse( { 'reason': "Missing/invalid 'id[]' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'id[]' argument." )
 
     data = post_serializer( posts )
 
@@ -155,8 +154,10 @@ def get_all( request ):
     """
         Get all the posts from the user.
 
-        Requires the 'api_key' variable in the post request.
-        returned = {
+        Variables required in the POST request:
+            - api_key : User identifier.
+
+        returns = {
             'posts': [
                 {
                     'id': int,
@@ -171,7 +172,7 @@ def get_all( request ):
     user = _get_user( request )
 
     if not user:
-        return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
 
     posts = user.posts.all()
     data = post_serializer( posts )
@@ -185,36 +186,75 @@ def update( request ):
     """
         Update an existing post.
 
-        Requires an 'api_key', an 'id' and a 'text' variable sent in the post request.
-        returned = {}
+        Variables required in the POST request:
+            - api_key : User identifier.
+            - id      : Post identifier.
+            - text    : The new text of the post.
     """
     user = _get_user( request )
 
     if not user:
-        return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
 
     post = _get_post( request, user )
 
     if not post:
-        return JsonResponse( { 'reason': "Missing/invalid 'id' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'id' argument." )
 
     try:
         text = request.POST[ 'text' ]
 
     except KeyError:
-        return JsonResponse( { 'reason': "Need a 'text' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Need a 'text' argument." )
 
     post.last_updated = timezone.now()
     post.text = text
     post.save( update_fields= [ 'last_updated', 'text' ] )
 
-    return JsonResponse( {}, status= 200 )
+    return HttpResponse( status= 200 )
 
 
 @csrf_exempt
 @post_only
 def update_multiple( request ):
-    pass
+    """
+        Update several posts.
+
+        Variables required in the POST request:
+            - api_key : User identifier.
+            - id[]    : A list with the posts identifiers.
+            - text[]  : A list with the new text for each post. The text must have the same position as in the id list.
+    """
+    user = _get_user( request )
+
+    if not user:
+        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
+
+    posts = _get_posts( request, user )
+
+    if not posts:
+        return HttpResponseBadRequest( "Missing/invalid 'id[]' argument." )
+
+    texts = request.POST.getlist( 'text[]' )
+
+    if len( texts ) == 0:
+        return HttpResponseBadRequest( "Missing/invalid 'text[]' argument." )
+
+    now = timezone.now()
+
+    for position, post in enumerate( posts ):
+        try:
+            text = texts[ position ]
+
+        except IndexError:
+            continue
+
+        else:
+            post.last_updated = now
+            post.text = text
+            post.save( update_fields= [ 'last_updated', 'text' ] )
+
+    return HttpResponse( status= 200 )
 
 
 @csrf_exempt
@@ -223,34 +263,67 @@ def delete( request ):
     """
         Remove an existing post.
 
-        Requires an 'api_key' and an 'id' variable sent in the post request.
-        returned = {}
+        Variables required in the POST request:
+            - api_key : User identifier.
+            - id      : Post identifier.
     """
     user = _get_user( request )
 
     if not user:
-        return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
 
     post = _get_post( request, user )
 
     if not post:
-        return JsonResponse( { 'reason': "Missing/invalid 'id' argument." }, status= 400 )
+        return HttpResponseBadRequest( "Missing/invalid 'id' argument." )
 
     post.delete()
 
-    return JsonResponse( {}, status= 200 )
+    return HttpResponse( status= 200 )
 
 
 @csrf_exempt
 @post_only
 def delete_multiple( request ):
-    pass
+    """
+        Delete multiple posts.
+
+        Variables required in the POST request:
+            - api_key : User identifier.
+            - id[]    : A list with the posts identifiers.
+    """
+    user = _get_user( request )
+
+    if not user:
+        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
+
+    posts = _get_posts( request, user )
+
+    if not posts:
+        return HttpResponseBadRequest( "Missing/invalid 'id[]' argument." )
+
+    posts.delete()
+
+    return HttpResponse( status= 200 )
 
 
 @csrf_exempt
 @post_only
 def delete_all( request ):
-    pass
+    """
+        Remove all the posts of a user.
+
+        Variables required in the POST request:
+            - api_key : User identifier.
+    """
+    user = _get_user( request )
+
+    if not user:
+        return HttpResponseBadRequest( "Missing/invalid 'api_key' argument." )
+
+    user.posts.all().delete()
+
+    return HttpResponse( status= 200 )
 
 
 def _get_user( request ):

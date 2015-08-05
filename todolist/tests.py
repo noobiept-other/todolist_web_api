@@ -32,7 +32,10 @@ class TodolistTest( TestCase ):
 
 
     def make_request(self, url, arguments):
-
+        """
+            Make a POST request and add the required 'api_key' to the arguments.
+            Return the de-serialized JSON data from a response object.
+        """
             # the api_key is needed for all requests
         arguments[ 'api_key' ] = self.api_key
 
@@ -51,17 +54,11 @@ class TodolistTest( TestCase ):
         self.assertEqual( response.status_code, 400 )
 
             # invalid 'api_key'
-        response = self.client.post( self.add_url,
-            {
-                'api_key': 'random'
-            })
+        response = self.client.post( self.add_url, { 'api_key': 'random' })
         self.assertEqual( response.status_code, 400 )
 
             # missing 'text' and 'text[]' argument
-        response = self.client.post( self.add_url,
-            {
-                'api_key': self.api_key
-            })
+        response = self.client.post( self.add_url, { 'api_key': self.api_key })
         self.assertEqual( response.status_code, 400 )
 
 
@@ -189,21 +186,16 @@ class TodolistTest( TestCase ):
         text = 'test'
         updated_text = 'test2'
 
-        addResponse = self.make_request( self.add_url,
-            {
-                'text': text
-            })
+        addResponse = self.make_request( self.add_url, { 'text': text })
 
-        self.make_request( self.update_url,
+        self.client.post( self.update_url,
             {
+                'api_key': self.api_key,
                 'text': updated_text,
                 'id': addResponse[ 'id' ]
             })
 
-        getResponse = self.make_request( self.get_url,
-            {
-                'id': addResponse[ 'id' ]
-            })
+        getResponse = self.make_request( self.get_url, { 'id': addResponse[ 'id' ] })
 
         self.assertEqual( getResponse[ 'text' ], updated_text )
 
@@ -235,7 +227,12 @@ class TodolistTest( TestCase ):
     def test_delete(self):
 
         addResponse = self.make_request( self.add_url, { 'text': 'test' })
-        self.make_request( self.delete_url, { 'id': addResponse[ 'id' ] })
+
+        self.client.post( self.delete_url,
+            {
+            'id': addResponse[ 'id' ],
+            'api_key': self.api_key
+            })
 
         allResponse = self.make_request( self.get_all_url, {} )
 

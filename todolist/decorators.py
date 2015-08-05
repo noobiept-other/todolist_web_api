@@ -1,10 +1,10 @@
-from django.http import JsonResponse
+from django.http import HttpResponseNotAllowed
 
 def post_only( function ):
 
     def func_wrapper( request, *args, **kwargs ):
         if request.method != 'POST':
-            return JsonResponse( { 'reason': 'POST requests only.' }, status= 405 )
+            return HttpResponseNotAllowed( [ 'POST' ] )
 
         return function( request, *args, **kwargs )
 
