@@ -20,10 +20,10 @@ class TodolistTest( TestCase ):
 
             # get the api's urls
         self.add_url = reverse( views.add )
-        self.all_url = reverse( views.all_posts )
-        self.get_url = reverse( views.single_post )
-        self.update_url = reverse( views.update_post )
-        self.delete_url = reverse( views.delete_post )
+        self.all_url = reverse( views.get_all )
+        self.get_url = reverse( views.get )
+        self.update_url = reverse( views.update )
+        self.delete_url = reverse( views.delete )
 
 
     def make_request(self, url, arguments):

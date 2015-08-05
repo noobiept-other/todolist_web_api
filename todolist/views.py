@@ -11,14 +11,6 @@ from todolist.serializers import post_serializer
 from todolist.decorators import post_only
 
 
-@login_required
-def home( request ):
-    """
-        Redirect to the user page.
-    """
-    return HttpResponseRedirect( reverse( 'accounts:user_page', args= [ request.user.username ] ) )
-
-
 def show_help( request ):
     """
         Show the API documentation.
@@ -75,7 +67,7 @@ def add( request ):
 
 @csrf_exempt
 @post_only
-def all_posts( request ):
+def get_all( request ):
     """
         Get all the posts from the user.
 
@@ -104,7 +96,7 @@ def all_posts( request ):
 
 @csrf_exempt
 @post_only
-def single_post( request ):
+def get( request ):
     """
         Get a post from a user.
 
@@ -133,7 +125,7 @@ def single_post( request ):
 
 @csrf_exempt
 @post_only
-def update_post( request ):
+def update( request ):
     """
         Update an existing post.
 
@@ -165,7 +157,7 @@ def update_post( request ):
 
 @csrf_exempt
 @post_only
-def delete_post( request ):
+def delete( request ):
     """
         Remove an existing post.
 

@@ -15,8 +15,7 @@
 
 <div id="Menu">
     <ul class="horizontalList">
-        <li><a href="{% url 'home' %}">home</a></li>
-        <li><a href="{% url 'help' %}">help</a></li>
+        <li><a href="{% url 'home' %}">help</a></li>
         <li>
         {% if user.is_authenticated %}
             {{ user|account_name }} ( <a href="{% url 'accounts:logout' %}?next={{ request.get_full_path|urlencode }}">logout</a> )

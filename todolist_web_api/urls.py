@@ -12,9 +12,9 @@ import accounts.urls
 
 urlpatterns = [
 
-    url( '^$', todolist.views.home, name= 'home' ),
+    url( '^$', todolist.views.show_help, name= 'home' ),
 
-    url( r'^', include( todolist.urls ) ),
+    url( r'^', include( todolist.urls, namespace= 'todolist', app_name= 'todolist' ) ),
     url( r'^accounts/', include( accounts.urls, namespace= 'accounts', app_name= 'accounts' ) ),
     url( r'^admin/', include( admin.site.urls ) ),
 ]
