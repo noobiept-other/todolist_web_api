@@ -26,16 +26,13 @@ def show_help( request ):
 @post_only
 def add( request ):
     """
-        Add a single or multiple new posts.
+        Add a single post to the list.
 
-        Variables required in the post request:
+        Variables required in the POST request:
             - api_key : User identifier.
             - text    : The text string of a single post.
-            - text[]  : A list of strings, of the posts to be added.
-        Send either "text" (to add a single post) or "text[]" (multiple posts).
 
-        return_single_post = { 'id': int }
-        return_multiple_posts = { 'ids': int[] }
+        returns = { 'id': int }
     """
     user = _get_user( request )
 
@@ -44,64 +41,57 @@ def add( request ):
 
     text = request.POST.get( 'text' )
 
-    if text:
-        post = Post.objects.create( text= text, author= user )
+    if not text:
+        return JsonResponse( { 'reason': "Need 'text' argument." }, status= 400 )
 
-        return JsonResponse( { 'id': post.pk }, status= 201 )
+    post = Post.objects.create( text= text, author= user )
 
-    else:
-        textList = request.POST.getlist( 'text[]' )
-
-        if len( textList ) == 0:
-            return JsonResponse( { 'reason': "Need 'text' or 'text[]' argument." }, status= 400 )
-
-        ids = []
-
-        for text in textList:
-            post = Post.objects.create( text= text, author= user )
-
-            ids.append( post.pk )
-
-        return JsonResponse( { 'ids': ids }, status= 201 )
+    return JsonResponse( { 'id': post.pk }, status= 201 )
 
 
 @csrf_exempt
 @post_only
-def get_all( request ):
+def add_multiple( request ):
     """
-        Get all the posts from the user.
+        Add multiple new posts.
 
-        Requires the 'api_key' variable in the post request.
-        returned = [
-            {
-                'id': int,
-                'text': str,
-                'author': str,
-                'last_updated': str
-            },
-            # (...)
-        ]
+        Variables required in the POST request:
+            - api_key : User identifier.
+            - text[]  : A list of strings, of the posts to be added.
+
+        returns = { 'ids': int[] }
     """
     user = _get_user( request )
 
     if not user:
         return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
 
-    posts = user.posts.all()
+    textList = request.POST.getlist( 'text[]' )
 
-    data = post_serializer( posts )
+    if len( textList ) == 0:
+        return JsonResponse( { 'reason': "Need 'text[]' argument." }, status= 400 )
 
-    return JsonResponse( data, safe= False, status= 200 )
+    ids = []
+
+    for text in textList:
+        post = Post.objects.create( text= text, author= user )
+
+        ids.append( post.pk )
+
+    return JsonResponse( { 'ids': ids }, status= 201 )
 
 
 @csrf_exempt
 @post_only
 def get( request ):
     """
-        Get a post from a user.
+        Get a post from an user.
 
-        Requires an 'api_key' and an 'id' variable sent in the post request.
-        returned = {
+        Variables required in the POST request:
+            - api_key : User identifier.
+            - id      : Post identifier.
+
+        returns = {
             'id': int,
             'text': str,
             'author': str,
@@ -121,6 +111,72 @@ def get( request ):
     data = post_serializer( post )
 
     return JsonResponse( data, status= 200 )
+
+
+@csrf_exempt
+@post_only
+def get_multiple( request ):
+    """
+        Get several posts from an user.
+
+        Variables required in the POST request:
+            - api_key : User identifier.
+            - id[]    : A list of the post ids to retrieve.
+
+        returns = {
+            'posts': [
+                {
+                    'id': int,
+                    'text': str,
+                    'author': str,
+                    'last_updated': str
+                }
+            ]
+        }
+    """
+    user = _get_user( request )
+
+    if not user:
+        return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
+
+    posts = _get_posts( request, user )
+
+    if not posts:
+        return JsonResponse( { 'reason': "Missing/invalid 'id[]' argument." }, status= 400 )
+
+    data = post_serializer( posts )
+
+    return JsonResponse( { 'posts': data }, status= 200 )
+
+
+@csrf_exempt
+@post_only
+def get_all( request ):
+    """
+        Get all the posts from the user.
+
+        Requires the 'api_key' variable in the post request.
+        returned = {
+            'posts': [
+                {
+                    'id': int,
+                    'text': str,
+                    'author': str,
+                    'last_updated': str
+                },
+                # (...)
+            ]
+        }
+    """
+    user = _get_user( request )
+
+    if not user:
+        return JsonResponse( { 'reason': "Missing/invalid 'api_key' argument." }, status= 400 )
+
+    posts = user.posts.all()
+    data = post_serializer( posts )
+
+    return JsonResponse( { 'posts': data }, status= 200 )
 
 
 @csrf_exempt
@@ -157,6 +213,12 @@ def update( request ):
 
 @csrf_exempt
 @post_only
+def update_multiple( request ):
+    pass
+
+
+@csrf_exempt
+@post_only
 def delete( request ):
     """
         Remove an existing post.
@@ -177,6 +239,18 @@ def delete( request ):
     post.delete()
 
     return JsonResponse( {}, status= 200 )
+
+
+@csrf_exempt
+@post_only
+def delete_multiple( request ):
+    pass
+
+
+@csrf_exempt
+@post_only
+def delete_all( request ):
+    pass
 
 
 def _get_user( request ):
@@ -202,7 +276,7 @@ def _get_user( request ):
 
 def _get_post( request, user ):
     """
-        Get the post model of the given 'id'.
+        Get the post model object of the given 'id'.
     """
     try:
         postId = request.POST[ 'id' ]
@@ -217,3 +291,20 @@ def _get_post( request, user ):
         return None
 
     return post
+
+
+def _get_posts( request, user ):
+    """
+        Get the posts model objects given a list of ids.
+    """
+    ids = request.POST.getlist( 'id[]' )
+
+    if len( ids ) == 0:
+        return None
+
+    posts = user.posts.filter( pk__in= ids )
+
+    if not posts:
+        return None
+
+    return posts
