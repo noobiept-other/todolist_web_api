@@ -30,7 +30,8 @@ def info( request ):
             - api_key : User identifier.
 
         returns = {
-            'username': str
+            'username': str,
+            'post_count': int
         }
     """
     user = _get_user( request )
@@ -38,7 +39,12 @@ def info( request ):
     if isinstance( user, HttpResponse ):
         return user
 
-    return JsonResponse( { 'username': user.username }, status= 200 )
+    response = {
+        'username': user.username,
+        'post_count': user.posts.count()
+    }
+
+    return JsonResponse( response, status= 200 )
 
 
 @csrf_exempt

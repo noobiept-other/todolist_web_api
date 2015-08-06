@@ -80,8 +80,10 @@ class TodolistTest( TestCase ):
 
 
     def test_info(self):
+        self._make_request( self.add_url, { 'text': 'a' } )
         info = self._make_request( self.info_url )
 
+        self.assertEqual( info[ 'post_count' ], 1 )
         self.assertEqual( info[ 'username' ], self.user.username )
 
 
