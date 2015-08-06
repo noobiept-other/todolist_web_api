@@ -18,6 +18,7 @@ class TodolistTest( TestCase ):
         self.client = Client()
 
             # get the api's urls
+        self.info_url = reverse( 'todolist:info' )
         self.add_url = reverse( 'todolist:add' )
         self.add_multiple_url = reverse( 'todolist:add_multiple' )
         self.get_url = reverse( 'todolist:get' )
@@ -74,6 +75,16 @@ class TodolistTest( TestCase ):
     # -- Tests -- #
 
 
+    def test_info_bad_request(self):
+        self._bad_request( self.info_url, False )
+
+
+    def test_info(self):
+        info = self._make_request( self.info_url )
+
+        self.assertEqual( info[ 'username' ], self.user.username )
+
+
     def test_add_bad_request(self):
         self._bad_request( self.add_url, True )
 
@@ -107,6 +118,22 @@ class TodolistTest( TestCase ):
     def test_get_bad_request(self):
         self._bad_request( self.get_url, True )
 
+            # test with an invalid 'id'
+        get = self.client.post( self.get_url,
+            {
+                'api_key': self.api_key,
+                'id': 'invalid'
+            })
+        self.assertEqual( get.status_code, 400 )
+
+            # test with a non-existent 'id'
+        get = self.client.post( self.get_url,
+            {
+                'api_key': self.api_key,
+                'id': 0
+            })
+        self.assertEqual( get.status_code, 400 )
+
 
     def test_get(self):
         text = 'test'
@@ -119,6 +146,22 @@ class TodolistTest( TestCase ):
 
     def test_get_multiple_bad_request(self):
         self._bad_request( self.get_multiple_url, True )
+
+            # test with an invalid 'id'
+        get = self.client.post( self.get_url,
+            {
+                'api_key': self.api_key,
+                'id[]': [ 0, 'invalid' ]
+            })
+        self.assertEqual( get.status_code, 400 )
+
+            # test with a non-existent 'id'
+        get = self.client.post( self.get_url,
+            {
+                'api_key': self.api_key,
+                'id[]': [ 0, 1 ]
+            })
+        self.assertEqual( get.status_code, 400 )
 
 
     def test_get_multiple(self):

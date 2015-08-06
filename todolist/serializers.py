@@ -6,7 +6,6 @@ def _post_model_to_dict( post ):
     return {
         'id': post.pk,
         'text': post.text,
-        'author': post.author.username,
         'last_updated': post.last_updated.strftime( '%d/%m/%Y %H:%M' )
     }
 

@@ -22,6 +22,27 @@ def show_help( request ):
 
 @csrf_exempt
 @post_only
+def info( request ):
+    """
+        Return information about the account.
+
+        Variables required in the POST request:
+            - api_key : User identifier.
+
+        returns = {
+            'username': str
+        }
+    """
+    user = _get_user( request )
+
+    if isinstance( user, HttpResponse ):
+        return user
+
+    return JsonResponse( { 'username': user.username }, status= 200 )
+
+
+@csrf_exempt
+@post_only
 def add( request ):
     """
         Add a single post to the list.
@@ -92,7 +113,6 @@ def get( request ):
         returns = {
             'id': int,
             'text': str,
-            'author': str,
             'last_updated': str
         }
     """
@@ -121,7 +141,6 @@ def get_multiple( request ):
                 {
                     'id': int,
                     'text': str,
-                    'author': str,
                     'last_updated': str
                 },
                 # (...)
@@ -152,7 +171,6 @@ def get_all( request ):
                 {
                     'id': int,
                     'text': str,
-                    'author': str,
                     'last_updated': str
                 },
                 # (...)

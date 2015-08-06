@@ -4,6 +4,8 @@ import todolist.views
 
 
 urlpatterns = [
+    url( r'^v1/info$', todolist.views.info, name= 'info' ),
+
     url( r'^v1/post/add$', todolist.views.add, name= 'add' ),
     url( r'^v1/post/add_multiple$', todolist.views.add_multiple, name= 'add_multiple' ),
 
