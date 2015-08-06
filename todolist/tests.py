@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 
 import json
 
-from todolist import views
 
 class TodolistTest( TestCase ):
     def setUp(self):
@@ -31,11 +30,17 @@ class TodolistTest( TestCase ):
         self.delete_all_url = reverse( 'todolist:delete_all' )
 
 
-    def make_request(self, url, arguments):
+    # -- Helper Functions -- #
+
+
+    def _make_request(self, url, arguments= None):
         """
             Make a POST request and add the required 'api_key' to the arguments.
             Return the de-serialized JSON data from a response object.
         """
+        if not arguments:
+            arguments = {}
+
             # the api_key is needed for all requests
         arguments[ 'api_key' ] = self.api_key
 
@@ -44,140 +49,121 @@ class TodolistTest( TestCase ):
         return json.loads( response.content.decode( encoding= 'utf-8' ) )
 
 
-    def test_add_bad_request(self):
+    def _bad_request(self, url, hasOtherArgs):
         """
-            Call with missing/wrong arguments to test if it is returned with status code of 400 (bad request)
+            Test for missing/invalid 'api_key' argument in the POST request, and for other missing variables.
         """
+            # not POST request
+        response = self.client.get( url )
+        self.assertEqual( response.status_code, 405 )
 
             # no arguments
-        response = self.client.post( self.add_url )
+        response = self.client.post( url )
         self.assertEqual( response.status_code, 400 )
 
             # invalid 'api_key'
-        response = self.client.post( self.add_url, { 'api_key': 'random' })
+        response = self.client.post( url, { 'api_key': 'random' } )
         self.assertEqual( response.status_code, 400 )
 
-            # missing 'text' and 'text[]' argument
-        response = self.client.post( self.add_url, { 'api_key': self.api_key })
-        self.assertEqual( response.status_code, 400 )
+            # requires other arguments, so should still get a 400 code
+        if hasOtherArgs:
+            response = self.client.post( url, { 'api_key': self.api_key } )
+            self.assertEqual( response.status_code, 400 )
+
+
+    # -- Tests -- #
+
+
+    def test_add_bad_request(self):
+        self._bad_request( self.add_url, True )
 
 
     def test_add(self):
-        """
-            Test the addition of a single post to the list.
-        """
         text = 'test'
 
-            # add single post
-        addResponse = self.make_request( self.add_url, { 'text': text })
-        getResponse = self.make_request( self.get_url, { 'id': addResponse[ 'id' ] })
+        addResponse = self._make_request( self.add_url, { 'text': text })
+        getResponse = self._make_request( self.get_url, { 'id': addResponse[ 'id' ] })
 
         self.assertEqual( getResponse[ 'text' ], text )
 
 
+    def test_add_multiple_bad_request(self):
+        self._bad_request( self.add_multiple_url, True )
+
+
     def test_add_multiple(self):
-        """
-            Test the addition of multiple posts to the list.
-        """
         text1 = 'one'
         text2 = 'two'
 
-        addResponse = self.make_request( self.add_multiple_url, { 'text[]': [ text1, text2 ] })
+        add = self._make_request( self.add_multiple_url, { 'text[]': [ text1, text2 ] })
 
-        response1 = self.make_request( self.get_url, { 'id': addResponse[ 'ids' ][ 0 ] })
-        response2 = self.make_request( self.get_url, { 'id': addResponse[ 'ids' ][ 1 ] })
+        response1 = self._make_request( self.get_url, { 'id': add[ 'ids' ][ 0 ] })
+        response2 = self._make_request( self.get_url, { 'id': add[ 'ids' ][ 1 ] })
 
         self.assertEqual( response1[ 'text' ], text1 )
         self.assertEqual( response2[ 'text' ], text2 )
 
 
+    def test_get_bad_request(self):
+        self._bad_request( self.get_url, True )
+
+
+    def test_get(self):
+        text = 'test'
+
+        add = self._make_request( self.add_url, { 'text': text } )
+        get = self._make_request( self.get_url, { 'id': add[ 'id' ] } )
+
+        self.assertEqual( get[ 'text' ], text )
+
+
     def test_get_multiple_bad_request(self):
-
-            # missing 'api_key'
-        response = self.client.post( self.get_multiple_url )
-        self.assertEqual( response.status_code, 400 )
-
-            # invalid 'api_key'
-        response = self.client.post( self.get_multiple_url )
-        self.assertEqual( response.status_code, 400 )
+        self._bad_request( self.get_multiple_url, True )
 
 
     def test_get_multiple(self):
         text = [ 'one', 'two', 'three' ]
 
-        add = self.make_request( self.add_multiple_url, { 'text[]': text } )
-        get = self.make_request( self.get_multiple_url, { 'id[]': add[  'ids' ] } )
+        add = self._make_request( self.add_multiple_url, { 'text[]': text } )
+        get = self._make_request( self.get_multiple_url, { 'id[]': add[  'ids' ] } )
 
         for position, post in enumerate( get[ 'posts' ] ):
             self.assertEqual( text[ position ], post[ 'text' ] )
 
 
     def test_get_all_bad_request(self):
-
-            # missing 'api_key'
-        response = self.client.post( self.get_all_url )
-        self.assertEqual( response.status_code, 400 )
-
-            # invalid 'api_key'
-        response = self.client.post( self.get_all_url, { 'api_key': 'random' })
-        self.assertEqual( response.status_code, 400 )
+        self._bad_request( self.get_all_url, False )
 
 
     def test_get_all(self):
-
-        allResponse = self.make_request( self.get_all_url, {} )
-
+            # should be empty
+        allResponse = self._make_request( self.get_all_url )
         self.assertEqual( len( allResponse[ 'posts' ] ), 0 )
 
+            # add some posts
         count = 5
 
         for number in range( count ):
-            self.make_request( self.add_url, { 'text': number })
+            self._make_request( self.add_url, { 'text': number })
 
-        allResponse = self.make_request( self.get_all_url, {} )
+            # confirm that we get all the added posts
+        allResponse = self._make_request( self.get_all_url )
 
         self.assertEqual( len( allResponse[ 'posts' ] ), count )
 
 
     def test_update_bad_request(self):
+        self._bad_request( self.update_url, True )
 
-        addResponse = self.make_request( self.add_url,
-            {
-                'text': 'test'
-            })
+        addResponse = self._make_request( self.add_url, { 'text': 'test' })
         postId = addResponse[ 'id' ]
 
-
-            # no arguments
-        response = self.client.post( self.update_url )
-
-        self.assertEqual( response.status_code, 400 )
-
-            # invalid 'api_key'
-        response = self.client.post( self.update_url,
-            {
-                'api_key': 'random'
-            })
-
-        self.assertEqual( response.status_code, 400 )
-
-            # missing 'id'
-
-        response = self.client.post( self.update_url,
-            {
-                'api_key': self.api_key
-            })
-
-        self.assertEqual( response.status_code, 400 )
-
-            # missing 'text'
-
+            # has the 'id' but missing the 'text'
         response = self.client.post( self.update_url,
             {
                 'api_key': self.api_key,
                 'id': postId
             })
-
         self.assertEqual( response.status_code, 400 )
 
 
@@ -186,7 +172,7 @@ class TodolistTest( TestCase ):
         text = 'test'
         updated_text = 'test2'
 
-        addResponse = self.make_request( self.add_url, { 'text': text })
+        addResponse = self._make_request( self.add_url, { 'text': text })
 
         self.client.post( self.update_url,
             {
@@ -195,46 +181,104 @@ class TodolistTest( TestCase ):
                 'id': addResponse[ 'id' ]
             })
 
-        getResponse = self.make_request( self.get_url, { 'id': addResponse[ 'id' ] })
+        getResponse = self._make_request( self.get_url, { 'id': addResponse[ 'id' ] })
 
         self.assertEqual( getResponse[ 'text' ], updated_text )
 
 
+    def test_update_multiple_bad_request(self):
+        self._bad_request( self.update_multiple_url, True )
+
+        add = self._make_request( self.add_multiple_url, { 'text[]': [  'a' 'b' ] } )
+
+            # has the 'id[]' but missing the 'text[]'
+        update = self.client.post( self.update_multiple_url,
+            {
+                'api_key': self.api_key,
+                'id[]': add[ 'ids' ]
+            })
+        self.assertEqual( update.status_code, 400 )
+
+
+    def test_update_multiple(self):
+        text = [ 'one', 'two', 'three' ]
+        text_updated = [ 'um', 'dois', 'três' ]
+
+        add = self._make_request( self.add_multiple_url, { 'text[]': text } )
+        update = self.client.post( self.update_multiple_url,
+            {
+                'api_key': self.api_key,
+                'id[]': add[ 'ids' ],
+                'text[]': text_updated
+            })
+        get = self._make_request( self.get_all_url )
+
+        for position, post in enumerate( get[ 'posts' ] ):
+            self.assertEqual( post[ 'text' ], text_updated[ position ] )
+
+
     def test_delete_bad_request(self):
-
-            # no arguments
-        response = self.client.post( self.delete_url )
-
-        self.assertEqual( response.status_code, 400 )
-
-            # invalid 'api_key'
-        response = self.client.post( self.delete_url,
-            {
-                'api_key': 'random'
-            })
-
-        self.assertEqual( response.status_code, 400 )
-
-            # missing 'id'
-        response = self.client.post( self.delete_url,
-            {
-                'api_key': self.api_key
-            })
-
-        self.assertEqual( response.status_code, 400 )
+        self._bad_request( self.delete_url, True )
 
 
     def test_delete(self):
+        add = self._make_request( self.add_url, { 'text': 'test' })
 
-        addResponse = self.make_request( self.add_url, { 'text': 'test' })
+            # confirm that it was added
+        get = self._make_request( self.get_all_url )
+        self.assertEqual( len( get[ 'posts' ] ), 1 )
 
-        self.client.post( self.delete_url,
+        delete = self.client.post( self.delete_url,
             {
-            'id': addResponse[ 'id' ],
-            'api_key': self.api_key
+                'api_key': self.api_key,
+                'id': add[ 'id' ]
             })
+        get = self._make_request( self.get_all_url )
 
-        allResponse = self.make_request( self.get_all_url, {} )
+            # confirm that it was deleted
+        self.assertEqual( len( get[ 'posts' ] ), 0 )
 
-        self.assertEqual( len( allResponse[ 'posts' ] ), 0 )
 
+    def test_delete_multiple_bad_request(self):
+        self._bad_request( self.delete_multiple_url, True )
+
+
+    def test_delete_multiple(self):
+        text = [ 'a', 'b', 'c', 'd' ]
+        length = len( text )
+
+        add = self._make_request( self.add_multiple_url, { 'text[]': text })
+
+            # confirm that it was added
+        get = self._make_request( self.get_all_url )
+        self.assertEqual( len( get[ 'posts' ] ), length )
+
+        removeCount = 2
+        delete = self.client.post( self.delete_multiple_url,
+            {
+                'api_key': self.api_key,
+                'id[]': add[ 'ids' ][ :removeCount ]
+            })
+        get = self._make_request( self.get_all_url )
+
+            # confirm that it was deleted
+        self.assertEqual( len( get[ 'posts' ] ), length - removeCount )
+
+
+    def test_delete_all_bad_request(self):
+        self._bad_request( self.delete_all_url, False )
+
+
+    def test_delete_all(self):
+        text = [ 1, 2, 3, 4, 5 ]
+        add = self._make_request( self.add_multiple_url, { 'text[]': text })
+
+            # confirm that it was added
+        get = self._make_request( self.get_all_url )
+        self.assertEqual( len( get[ 'posts' ] ), len( text ) )
+
+        delete = self.client.post( self.delete_all_url, { 'api_key': self.api_key } )
+        get = self._make_request( self.get_all_url )
+
+            # confirm that it was deleted
+        self.assertEqual( len( get[ 'posts' ] ), 0 )

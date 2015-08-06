@@ -359,6 +359,12 @@ def _get_post( request ):
         return HttpResponseBadRequest( "Missing 'id' argument." )
 
     try:
+        postId = int( postId )
+
+    except ValueError:
+        return HttpResponseBadRequest( "Invalid 'id' argument." )
+
+    try:
         post = user.posts.get( pk= postId )
 
     except Post.DoesNotExist:
@@ -381,7 +387,17 @@ def _get_posts( request ):
     if len( ids ) == 0:
         return HttpResponseBadRequest( "Missing 'id[]' argument." )
 
-    posts = user.posts.filter( pk__in= ids )
+    intIds = []
+
+        # make sure its a list of integers
+    for postId in ids:
+        try:
+            intIds.append( int( postId ) )
+
+        except ValueError:
+            return HttpResponseBadRequest( "Invalid 'id[]' argument." )
+
+    posts = user.posts.filter( pk__in= intIds )
 
     if not posts:
         return HttpResponseBadRequest( "Invalid 'id[]' argument." )
