@@ -19,6 +19,4 @@ urlpatterns = [
     url( r'^v1/list/delete$', todolist.views.delete, name= 'delete' ),
     url( r'^v1/list/delete_multiple$', todolist.views.delete_multiple, name= 'delete_multiple' ),
     url( r'^v1/list/delete_all$', todolist.views.delete_all, name= 'delete_all' ),
-
-    url( r'^v1/list/help$', todolist.views.show_help, name= 'help' ),
 ]

@@ -8,11 +8,13 @@ from django.contrib import admin
 import todolist.urls
 import todolist.views
 import accounts.urls
+import todolist_web_api.views
 
 
 urlpatterns = [
 
-    url( '^$', todolist.views.show_help, name= 'home' ),
+    url( '^$', todolist_web_api.views.show_help, name= 'home' ),
+    url( '^test$', todolist_web_api.views.test, name= 'test' ),
 
     url( r'^', include( todolist.urls, namespace= 'todolist', app_name= 'todolist' ) ),
     url( r'^accounts/', include( accounts.urls, namespace= 'accounts', app_name= 'accounts' ) ),

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'libraries/jquery-2.1.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/test.js' %}"></script>
+    <script type="text/javascript">
+        var API_KEY = '{{ api_key }}';
+    </script>
+{% endblock %}
+
+{% block content %}
+
+<h1>List</h1>
+
+<table id="ListTable">
+    <thead>
+        <tr>
+            <th>Text</th>
+            <th>Last Updated</th>
+        </tr>
+    </thead>
+    <tbody id="ListBody">
+
+    </tbody>
+</table>
+
+{% endblock %}

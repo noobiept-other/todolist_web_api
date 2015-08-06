@@ -1,23 +1,11 @@
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
-from django.shortcuts import render
 from django.utils import timezone
 
 from todolist.models import Post
 from todolist.serializers import post_serializer
 from todolist.decorators import post_only
-
-
-def show_help( request ):
-    """
-        Show the API documentation.
-    """
-    context = {
-        'domain': request.get_host()
-    }
-
-    return render( request, 'help.html', context )
 
 
 @csrf_exempt

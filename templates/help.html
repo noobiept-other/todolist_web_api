@@ -20,235 +20,267 @@
 </ul>
 
 
-
-
 <ul>
-    <li><a href="#Add">{{ domain }}/v1/post/add</a></li>
-    <li><a href="#All">{{ domain }}/v1/post/all</a></li>
-    <li><a href="#Get">{{ domain }}/v1/post/get</a></li>
-    <li><a href="#Update">{{ domain }}/v1/post/update</a></li>
-    <li><a href="#Delete">{{ domain }}/v1/post/delete</a></li>
+    <li><a href="#Info">{{ domain }}/v1/list/info</a></li>
+    <li><a href="#Add">{{ domain }}/v1/list/add</a></li>
+    <li><a href="#AddMultiple">{{ domain }}/v1/list/add_multiple</a></li>
+    <li><a href="#Get">{{ domain }}/v1/list/get</a></li>
+    <li><a href="#GetMultiple">{{ domain }}/v1/list/get_multiple</a></li>
+    <li><a href="#GetAll">{{ domain }}/v1/list/get_all</a></li>
+    <li><a href="#Update">{{ domain }}/v1/list/update</a></li>
+    <li><a href="#UpdateMultiple">{{ domain }}/v1/list/update_multiple</a></li>
+    <li><a href="#Delete">{{ domain }}/v1/list/delete</a></li>
+    <li><a href="#DeleteMultiple">{{ domain }}/v1/list/delete_multiple</a></li>
+    <li><a href="#DeleteAll">{{ domain }}/v1/list/delete_all</a></li>
 </ul>
 
 
-<h4 id="Add">{{ domain }}/v1/post/add</h4>
-
-    <p>
-        Add a single or multiple new posts.
-
-        Send either "text" (to add a single post) or "text[]" (multiple posts).
-    </p>
-    <table>
-        <tr>
-            <th>argument</th>
-            <th>description</th>
-        </tr>
-        <tr>
-            <td>api_key</td>
-            <td>To identify the user.</td>
-        </tr>
-        <tr>
-            <td>text</td>
-            <td>The text string of a single post.</td>
-        </tr>
-        <tr>
-            <td>text[]</td>
-            <td>A list of strings, of the posts to be added.</td>
-        </tr>
-    </table>
-    <br />
-    <table>
-        <tr>
-            <th>response</th>
-            <th>object returned</th>
-            <th>status code</th>
-        </tr>
-        <tr>
-            <td>single post success</td>
-            <td>{ "id": int }</td>
-            <td>201 (success/created)</td>
-        </tr>
-        <tr>
-            <td>multiple posts success</td>
-            <td>{ "ids": int[] }</td>
-            <td>201 (success/created)</td>
-        </tr>
-        <tr>
-            <td>failure</td>
-            <td>{ "reason": "the reason here" }</td>
-            <td>400 (bad request)</td>
-        </tr>
-    </table>
-
-    <br />
-    <a href="#Menu">top</a>
+<h4 id="Info">{{ domain }}/v1/list/info</h4>
+<p>Return information about the account.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+</table>
+<pre>
+returns = {
+    'username': str,
+    'post_count': int
+}
+</pre>
+<a href="#Menu">top</a>
 
 
-<h4 id="All">{{ domain }}/v1/post/all</h4>
-
-    <p>
-        Get all the posts.
-    </p>
-    <table>
-        <tr>
-            <th>argument</th>
-            <th>description</th>
-        </tr>
-        <tr>
-            <td>api_key</td>
-            <td>To identify the user.</td>
-        </tr>
-    </table>
-    <br />
-    <table>
-        <tr>
-            <th>response</th>
-            <th>object returned</th>
-            <th>status code</th>
-        </tr>
-        <tr>
-            <td>success</td>
-            <td>[ { "id": int, "text": str, "author": str, "last_updated": str }, ... ]</td>
-            <td>200 (success/ok)</td>
-        </tr>
-        <tr>
-            <td>failure</td>
-            <td>{ "reason": "the reason here" }</td>
-            <td>400 (bad request)</td>
-        </tr>
-    </table>
-
-    <br />
-    <a href="#Menu">top</a>
+<h4 id="Add">{{ domain }}/v1/list/add</h4>
+<p>Add a single post to the list.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>text</td>
+        <td>The text string of a single post.</td>
+    </tr>
+</table>
+<pre>
+returns = { 'id': int }
+</pre>
+<a href="#Menu">top</a>
 
 
-<h4 id="Get">{{ domain }}/v1/post/get</h4>
-
-    <p>
-        Get a single post.
-    </p>
-    <table>
-        <tr>
-            <th>argument</th>
-            <th>description</th>
-        </tr>
-        <tr>
-            <td>api_key</td>
-            <td>To identify the user.</td>
-        </tr>
-        <tr>
-            <td>id</td>
-            <td>The post identifier.</td>
-        </tr>
-    </table>
-    <br />
-    <table>
-        <tr>
-            <th>response</th>
-            <th>object returned</th>
-            <th>status code</th>
-        </tr>
-        <tr>
-            <td>success</td>
-            <td>{ "id": int, "text": str, "author": str, "last_updated": str }</td>
-            <td>200 (success/ok)</td>
-        </tr>
-        <tr>
-            <td>failure</td>
-            <td>{ "reason": "the reason here" }</td>
-            <td>400 (bad request)</td>
-        </tr>
-    </table>
-
-    <br />
-    <a href="#Menu">top</a>
+<h4 id="AddMultiple">{{ domain }}/v1/list/add_multiple</h4>
+<p>Add multiple new posts.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>text[]</td>
+        <td>A list of strings, of the posts to be added.</td>
+    </tr>
+</table>
+<pre>
+returns = { 'id[]': int[] }
+</pre>
+<a href="#Menu">top</a>
 
 
-<h4 id="Update">{{ domain }}/v1/post/update</h4>
-
-    <p>
-        Update a post's text.
-    </p>
-    <table>
-        <tr>
-            <th>argument</th>
-            <th>description</th>
-        </tr>
-        <tr>
-            <td>api_key</td>
-            <td>To identify the user.</td>
-        </tr>
-        <tr>
-            <td>id</td>
-            <td>The post identifier.</td>
-        </tr>
-        <tr>
-            <td>text</td>
-            <td>The new content to be replaced.</td>
-        </tr>
-    </table>
-    <br />
-    <table>
-        <tr>
-            <th>response</th>
-            <th>object returned</th>
-            <th>status code</th>
-        </tr>
-        <tr>
-            <td>success</td>
-            <td>{}</td>
-            <td>200 (success/ok)</td>
-        </tr>
-        <tr>
-            <td>failure</td>
-            <td>{ "reason": "the reason here" }</td>
-            <td>400 (bad request)</td>
-        </tr>
-    </table>
-
-    <br />
-    <a href="#Menu">top</a>
+<h4 id="Get">{{ domain }}/v1/list/get</h4>
+<p>Get a post from an user.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The post identifier.</td>
+    </tr>
+</table>
+<pre>
+returns = {
+    'id': int,
+    'text': str,
+    'last_updated': str
+}
+</pre>
+<a href="#Menu">top</a>
 
 
-<h4 id="Delete">{{ domain }}/v1/post/delete</h4>
+<h4 id="GetMultiple">{{ domain }}/v1/list/get_multiple</h4>
+<p>Get several posts from an user.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>id[]</td>
+        <td>A list of the post ids to retrieve.</td>
+    </tr>
+</table>
+<pre>
+returns = {
+    'post[]': [
+        {
+            'id': int,
+            'text': str,
+            'last_updated': str
+        },
+        # (...)
+    ]
+}
+</pre>
+<a href="#Menu">top</a>
 
-    <p>
-        Delete a post.
-    </p>
-    <table>
-        <tr>
-            <th>argument</th>
-            <th>description</th>
-        </tr>
-        <tr>
-            <td>api_key</td>
-            <td>To identify the user.</td>
-        </tr>
-        <tr>
-            <td>id</td>
-            <td>The post identifier.</td>
-        </tr>
-    </table>
-    <br />
-    <table>
-        <tr>
-            <th>response</th>
-            <th>object returned</th>
-            <th>status code</th>
-        </tr>
-        <tr>
-            <td>success</td>
-            <td>{}</td>
-            <td>200 (success/ok)</td>
-        </tr>
-        <tr>
-            <td>failure</td>
-            <td>{ "reason": "the reason here" }</td>
-            <td>400 (bad request)</td>
-        </tr>
-    </table>
 
-    <br />
-    <a href="#Menu">top</a>
+<h4 id="GetAll">{{ domain }}/v1/list/get_all</h4>
+<p>Get all the posts from the user.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+</table>
+<pre>
+returns = {
+    'post[]': [
+        {
+            'id': int,
+            'text': str,
+            'last_updated': str
+        },
+        # (...)
+    ]
+}
+</pre>
+<a href="#Menu">top</a>
+
+
+<h4 id="Update">{{ domain }}/v1/list/update</h4>
+<p>Update a post's text.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The post identifier.</td>
+    </tr>
+    <tr>
+        <td>text</td>
+        <td>The new content to be replaced.</td>
+    </tr>
+</table>
+<a href="#Menu">top</a>
+
+
+<h4 id="UpdateMultiple">{{ domain }}/v1/list/update_multiple</h4>
+<p>Update several posts.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>id[]</td>
+        <td>A list with the posts identifiers.</td>
+    </tr>
+    <tr>
+        <td>text[]</td>
+        <td>A list with the new text for each post. The text must have the same position as in the id list.</td>
+    </tr>
+</table>
+<a href="#Menu">top</a>
+
+
+<h4 id="Delete">{{ domain }}/v1/list/delete</h4>
+<p>Delete a post.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The post identifier.</td>
+    </tr>
+</table>
+<a href="#Menu">top</a>
+
+
+<h4 id="DeleteMultiple">{{ domain }}/v1/list/delete_multiple</h4>
+<p>Delete multiple posts.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+    <tr>
+        <td>id[]</td>
+        <td>A list with the posts identifiers.</td>
+    </tr>
+</table>
+<a href="#Menu">top</a>
+
+
+<h4 id="DeleteAll">{{ domain }}/v1/list/delete_all</h4>
+<p>Remove all the posts of a user.</p>
+<table>
+    <tr>
+        <th>argument</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td>api_key</td>
+        <td>To identify the user.</td>
+    </tr>
+</table>
+<a href="#Menu">top</a>
+    
 
 {% endblock %}

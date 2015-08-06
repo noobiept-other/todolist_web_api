@@ -186,7 +186,9 @@ def disable_user( request, username ):
 
 @login_required
 def new_api_key( request ):
-
+    """
+        Get a new API key.
+    """
     request.user.new_api_key()
     utilities.set_message( request, 'New API key set!' )
 
