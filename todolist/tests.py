@@ -97,8 +97,8 @@ class TodolistTest( TestCase ):
 
         add = self._make_request( self.add_multiple_url, { 'text[]': [ text1, text2 ] })
 
-        response1 = self._make_request( self.get_url, { 'id': add[ 'ids' ][ 0 ] })
-        response2 = self._make_request( self.get_url, { 'id': add[ 'ids' ][ 1 ] })
+        response1 = self._make_request( self.get_url, { 'id': add[ 'id[]' ][ 0 ] })
+        response2 = self._make_request( self.get_url, { 'id': add[ 'id[]' ][ 1 ] })
 
         self.assertEqual( response1[ 'text' ], text1 )
         self.assertEqual( response2[ 'text' ], text2 )
@@ -125,9 +125,9 @@ class TodolistTest( TestCase ):
         text = [ 'one', 'two', 'three' ]
 
         add = self._make_request( self.add_multiple_url, { 'text[]': text } )
-        get = self._make_request( self.get_multiple_url, { 'id[]': add[  'ids' ] } )
+        get = self._make_request( self.get_multiple_url, { 'id[]': add[  'id[]' ] } )
 
-        for position, post in enumerate( get[ 'posts' ] ):
+        for position, post in enumerate( get[ 'post[]' ] ):
             self.assertEqual( text[ position ], post[ 'text' ] )
 
 
@@ -138,7 +138,7 @@ class TodolistTest( TestCase ):
     def test_get_all(self):
             # should be empty
         allResponse = self._make_request( self.get_all_url )
-        self.assertEqual( len( allResponse[ 'posts' ] ), 0 )
+        self.assertEqual( len( allResponse[ 'post[]' ] ), 0 )
 
             # add some posts
         count = 5
@@ -149,7 +149,7 @@ class TodolistTest( TestCase ):
             # confirm that we get all the added posts
         allResponse = self._make_request( self.get_all_url )
 
-        self.assertEqual( len( allResponse[ 'posts' ] ), count )
+        self.assertEqual( len( allResponse[ 'post[]' ] ), count )
 
 
     def test_update_bad_request(self):
@@ -195,7 +195,7 @@ class TodolistTest( TestCase ):
         update = self.client.post( self.update_multiple_url,
             {
                 'api_key': self.api_key,
-                'id[]': add[ 'ids' ]
+                'id[]': add[ 'id[]' ]
             })
         self.assertEqual( update.status_code, 400 )
 
@@ -208,12 +208,12 @@ class TodolistTest( TestCase ):
         update = self.client.post( self.update_multiple_url,
             {
                 'api_key': self.api_key,
-                'id[]': add[ 'ids' ],
+                'id[]': add[ 'id[]' ],
                 'text[]': text_updated
             })
         get = self._make_request( self.get_all_url )
 
-        for position, post in enumerate( get[ 'posts' ] ):
+        for position, post in enumerate( get[ 'post[]' ] ):
             self.assertEqual( post[ 'text' ], text_updated[ position ] )
 
 
@@ -226,7 +226,7 @@ class TodolistTest( TestCase ):
 
             # confirm that it was added
         get = self._make_request( self.get_all_url )
-        self.assertEqual( len( get[ 'posts' ] ), 1 )
+        self.assertEqual( len( get[ 'post[]' ] ), 1 )
 
         delete = self.client.post( self.delete_url,
             {
@@ -236,7 +236,7 @@ class TodolistTest( TestCase ):
         get = self._make_request( self.get_all_url )
 
             # confirm that it was deleted
-        self.assertEqual( len( get[ 'posts' ] ), 0 )
+        self.assertEqual( len( get[ 'post[]' ] ), 0 )
 
 
     def test_delete_multiple_bad_request(self):
@@ -251,18 +251,18 @@ class TodolistTest( TestCase ):
 
             # confirm that it was added
         get = self._make_request( self.get_all_url )
-        self.assertEqual( len( get[ 'posts' ] ), length )
+        self.assertEqual( len( get[ 'post[]' ] ), length )
 
         removeCount = 2
         delete = self.client.post( self.delete_multiple_url,
             {
                 'api_key': self.api_key,
-                'id[]': add[ 'ids' ][ :removeCount ]
+                'id[]': add[ 'id[]' ][ :removeCount ]
             })
         get = self._make_request( self.get_all_url )
 
             # confirm that it was deleted
-        self.assertEqual( len( get[ 'posts' ] ), length - removeCount )
+        self.assertEqual( len( get[ 'post[]' ] ), length - removeCount )
 
 
     def test_delete_all_bad_request(self):
@@ -275,10 +275,10 @@ class TodolistTest( TestCase ):
 
             # confirm that it was added
         get = self._make_request( self.get_all_url )
-        self.assertEqual( len( get[ 'posts' ] ), len( text ) )
+        self.assertEqual( len( get[ 'post[]' ] ), len( text ) )
 
         delete = self.client.post( self.delete_all_url, { 'api_key': self.api_key } )
         get = self._make_request( self.get_all_url )
 
             # confirm that it was deleted
-        self.assertEqual( len( get[ 'posts' ] ), 0 )
+        self.assertEqual( len( get[ 'post[]' ] ), 0 )

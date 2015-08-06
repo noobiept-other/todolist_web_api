@@ -57,7 +57,7 @@ def add_multiple( request ):
             - api_key : User identifier.
             - text[]  : A list of strings, of the posts to be added.
 
-        returns = { 'ids': int[] }
+        returns = { 'id[]': int[] }
     """
     user = _get_user( request )
 
@@ -76,7 +76,7 @@ def add_multiple( request ):
 
         ids.append( post.pk )
 
-    return JsonResponse( { 'ids': ids }, status= 201 )
+    return JsonResponse( { 'id[]': ids }, status= 201 )
 
 
 @csrf_exempt
@@ -117,7 +117,7 @@ def get_multiple( request ):
             - id[]    : A list of the post ids to retrieve.
 
         returns = {
-            'posts': [
+            'post[]': [
                 {
                     'id': int,
                     'text': str,
@@ -128,14 +128,14 @@ def get_multiple( request ):
             ]
         }
     """
-    posts = _get_posts( request )
+    posts = _get_post_list( request )
 
     if isinstance( posts, HttpResponse ):
         return posts
 
     data = post_serializer( posts )
 
-    return JsonResponse( { 'posts': data }, status= 200 )
+    return JsonResponse( { 'post[]': data }, status= 200 )
 
 
 @csrf_exempt
@@ -148,7 +148,7 @@ def get_all( request ):
             - api_key : User identifier.
 
         returns = {
-            'posts': [
+            'post[]': [
                 {
                     'id': int,
                     'text': str,
@@ -167,7 +167,7 @@ def get_all( request ):
     posts = user.posts.all()
     data = post_serializer( posts )
 
-    return JsonResponse( { 'posts': data }, status= 200 )
+    return JsonResponse( { 'post[]': data }, status= 200 )
 
 
 @csrf_exempt
@@ -209,7 +209,7 @@ def update_multiple( request ):
             - id[]    : A list with the posts identifiers.
             - text[]  : A list with the new text for each post. The text must have the same position as in the id list.
     """
-    posts = _get_posts( request )
+    posts = _get_post_list( request )
 
     if isinstance( posts, HttpResponse ):
         return posts
@@ -266,7 +266,7 @@ def delete_multiple( request ):
             - api_key : User identifier.
             - id[]    : A list with the posts identifiers.
     """
-    posts = _get_posts( request )
+    posts = _get_post_list( request )
 
     if isinstance( posts, HttpResponse ):
         return posts
@@ -373,7 +373,7 @@ def _get_post( request ):
     return post
 
 
-def _get_posts( request ):
+def _get_post_list( request ):
     """
         Get the posts model objects given a list of ids.
     """
