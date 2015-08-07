@@ -14,3 +14,13 @@ Commands
 - http://example.com/v1/list/delete
 - http://example.com/v1/list/delete_multiple
 - http://example.com/v1/list/delete_all
+
+
+Libraries
+=========
+
+- django 1.8
+- jquery 2.1
+- jqueryui 1.11
+    - dialog
+    - flick theme

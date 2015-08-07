@@ -3,6 +3,9 @@
 
 {% block scripts %}
     <script type="text/javascript" src="{% static 'libraries/jquery-2.1.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'libraries/jqueryui/jquery-ui.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'libraries/jqueryui/jquery-ui.min.css' %}" />
+
     <script type="text/javascript" src="{% static 'js/test.js' %}"></script>
     <script type="text/javascript">
         var API_KEY = '{{ api_key }}';
@@ -12,6 +15,16 @@
 {% block content %}
 
 <h1>List</h1>
+
+<p>
+    <button id="Add">Add</button>
+    <button id="GetAll">Get All</button>
+</p>
+
+<div id="AddDialog" title="Add a new Post">
+    <label for="AddText">Text:</label>
+    <input type="text" id="AddText" />
+</div>
 
 <table id="ListTable">
     <thead>
