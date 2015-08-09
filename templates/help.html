@@ -73,7 +73,11 @@ returns = {
     </tr>
 </table>
 <pre>
-returns = { 'id': int }
+returns = {
+    'id': int,
+    'text': str,
+    'last_updated': str
+}
 </pre>
 <a href="#Menu">top</a>
 
@@ -95,7 +99,16 @@ returns = { 'id': int }
     </tr>
 </table>
 <pre>
-returns = { 'id[]': int[] }
+returns = {
+    'post[]': [
+        {
+            'id': int,
+            'text': str,
+            'last_updated': str
+        },
+        # (...)
+    ]
+}
 </pre>
 <a href="#Menu">top</a>
 
@@ -204,6 +217,13 @@ returns = {
         <td>The new content to be replaced.</td>
     </tr>
 </table>
+<pre>
+returns = {
+    'id': int,
+    'text': str,
+    'last_updated': str
+}
+</pre>
 <a href="#Menu">top</a>
 
 
@@ -227,6 +247,18 @@ returns = {
         <td>A list with the new text for each post. The text must have the same position as in the id list.</td>
     </tr>
 </table>
+<pre>
+returns = {
+    'post[]': [
+        {
+            'id': int,
+            'text': str,
+            'last_updated': str
+        },
+        # (...)
+    ]
+}
+</pre>
 <a href="#Menu">top</a>
 
 

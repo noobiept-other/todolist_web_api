@@ -72,6 +72,10 @@ class TodolistTest( TestCase ):
             self.assertEqual( response.status_code, 400 )
 
 
+    def get_ids(self, response):
+        return [ post[ 'id' ] for post in response[ 'post[]' ] ]
+
+
     # -- Tests -- #
 
 
@@ -109,9 +113,10 @@ class TodolistTest( TestCase ):
         text2 = 'two'
 
         add = self._make_request( self.add_multiple_url, { 'text[]': [ text1, text2 ] })
+        ids = self.get_ids( add )
 
-        response1 = self._make_request( self.get_url, { 'id': add[ 'id[]' ][ 0 ] })
-        response2 = self._make_request( self.get_url, { 'id': add[ 'id[]' ][ 1 ] })
+        response1 = self._make_request( self.get_url, { 'id': ids[ 0 ] })
+        response2 = self._make_request( self.get_url, { 'id': ids[ 1 ] })
 
         self.assertEqual( response1[ 'text' ], text1 )
         self.assertEqual( response2[ 'text' ], text2 )
@@ -170,7 +175,7 @@ class TodolistTest( TestCase ):
         text = [ 'one', 'two', 'three' ]
 
         add = self._make_request( self.add_multiple_url, { 'text[]': text } )
-        get = self._make_request( self.get_multiple_url, { 'id[]': add[  'id[]' ] } )
+        get = self._make_request( self.get_multiple_url, { 'id[]': self.get_ids( add ) } )
 
         for position, post in enumerate( get[ 'post[]' ] ):
             self.assertEqual( text[ position ], post[ 'text' ] )
@@ -200,14 +205,13 @@ class TodolistTest( TestCase ):
     def test_update_bad_request(self):
         self._bad_request( self.update_url, True )
 
-        addResponse = self._make_request( self.add_url, { 'text': 'test' })
-        postId = addResponse[ 'id' ]
+        add = self._make_request( self.add_url, { 'text': 'test' })
 
             # has the 'id' but missing the 'text'
         response = self.client.post( self.update_url,
             {
                 'api_key': self.api_key,
-                'id': postId
+                'id': add[ 'id' ]
             })
         self.assertEqual( response.status_code, 400 )
 
@@ -240,7 +244,7 @@ class TodolistTest( TestCase ):
         update = self.client.post( self.update_multiple_url,
             {
                 'api_key': self.api_key,
-                'id[]': add[ 'id[]' ]
+                'id[]': self.get_ids( add )
             })
         self.assertEqual( update.status_code, 400 )
 
@@ -250,10 +254,11 @@ class TodolistTest( TestCase ):
         text_updated = [ 'um', 'dois', 'três' ]
 
         add = self._make_request( self.add_multiple_url, { 'text[]': text } )
+
         update = self.client.post( self.update_multiple_url,
             {
                 'api_key': self.api_key,
-                'id[]': add[ 'id[]' ],
+                'id[]': self.get_ids( add ),
                 'text[]': text_updated
             })
         get = self._make_request( self.get_all_url )
@@ -293,6 +298,7 @@ class TodolistTest( TestCase ):
         length = len( text )
 
         add = self._make_request( self.add_multiple_url, { 'text[]': text })
+        ids = self.get_ids( add )
 
             # confirm that it was added
         get = self._make_request( self.get_all_url )
@@ -302,7 +308,7 @@ class TodolistTest( TestCase ):
         delete = self.client.post( self.delete_multiple_url,
             {
                 'api_key': self.api_key,
-                'id[]': add[ 'id[]' ][ :removeCount ]
+                'id[]': ids[ :removeCount ]
             })
         get = self._make_request( self.get_all_url )
 

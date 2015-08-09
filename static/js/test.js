@@ -50,11 +50,6 @@ $( ADD_DIALOG ).dialog({
 $( addButton ).button();
 addButton.addEventListener( 'click', openAddDialog );
 
-    // get all posts button
-var getAllButton = document.getElementById( 'GetAll' );
-
-$( getAllButton ).button();
-getAllButton.addEventListener( 'click', getAll );
 
     // show the list on start
 getAll();
@@ -96,29 +91,11 @@ $.ajax({
         dataType: 'json',
         success: function( data, textStatus, jqXHR )
             {
-            getPost( data.id );
+            addToTable( data );
             },
         error: function( jqXHR, textStatus, errorThrown )
             {
             console.log( textStatus, errorThrown );
-            }
-    });
-}
-
-
-function getPost( postId )
-{
-$.ajax({
-        method: 'POST',
-        url: '/v1/list/get',
-        data: {
-            api_key: API_KEY,
-            id: postId
-        },
-        dataType: 'json',
-        success: function( data, textStatus, jqXHR )
-            {
-            addToTable( data );
             }
     });
 }

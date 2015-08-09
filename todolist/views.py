@@ -45,7 +45,11 @@ def add( request ):
             - api_key : User identifier.
             - text    : The text string of a single post.
 
-        returns = { 'id': int }
+        returns = {
+            'id': int,
+            'text': str,
+            'last_updated': str
+        }
     """
     user = _get_user( request )
 
@@ -59,7 +63,7 @@ def add( request ):
 
     post = Post.objects.create( text= text, author= user )
 
-    return JsonResponse( { 'id': post.pk }, status= 201 )
+    return JsonResponse( post_serializer( post ), status= 201 )
 
 
 @csrf_exempt
@@ -72,7 +76,16 @@ def add_multiple( request ):
             - api_key : User identifier.
             - text[]  : A list of strings, of the posts to be added.
 
-        returns = { 'id[]': int[] }
+        returns = {
+            'post[]': [
+                {
+                    'id': int,
+                    'text': str,
+                    'last_updated': str
+                },
+                # (...)
+            ]
+        }
     """
     user = _get_user( request )
 
@@ -84,14 +97,14 @@ def add_multiple( request ):
     if isinstance( textList, HttpResponse ):
         return textList
 
-    ids = []
+    posts = []
 
     for text in textList:
         post = Post.objects.create( text= text, author= user )
 
-        ids.append( post.pk )
+        posts.append( post )
 
-    return JsonResponse( { 'id[]': ids }, status= 201 )
+    return JsonResponse( { 'post[]': post_serializer( posts ) }, status= 201 )
 
 
 @csrf_exempt
@@ -192,6 +205,12 @@ def update( request ):
             - api_key : User identifier.
             - id      : Post identifier.
             - text    : The new text of the post.
+
+        returns = {
+            'id': int,
+            'text': str,
+            'last_updated': str
+        }
     """
     post = _get_post( request )
 
@@ -207,7 +226,7 @@ def update( request ):
     post.text = text
     post.save( update_fields= [ 'last_updated', 'text' ] )
 
-    return HttpResponse( status= 200 )
+    return JsonResponse( post_serializer( post ), status= 200 )
 
 
 @csrf_exempt
@@ -220,6 +239,17 @@ def update_multiple( request ):
             - api_key : User identifier.
             - id[]    : A list with the posts identifiers.
             - text[]  : A list with the new text for each post. The text must have the same position as in the id list.
+
+        returns = {
+            'post[]': [
+                {
+                    'id': int,
+                    'text': str,
+                    'last_updated': str
+                },
+                # (...)
+            ]
+        }
     """
     posts = _get_post_list( request )
 
@@ -245,7 +275,7 @@ def update_multiple( request ):
             post.text = text
             post.save( update_fields= [ 'last_updated', 'text' ] )
 
-    return HttpResponse( status= 200 )
+    return JsonResponse( { 'post[]': post_serializer( posts ) }, status= 200 )
 
 
 @csrf_exempt
