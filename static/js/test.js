@@ -12,12 +12,14 @@ var Test;
 
 
 var BODY;
+var MESSAGE;
 var ADD_DIALOG;
 
 
 Test.init = function()
 {
 BODY = document.getElementById( 'ListBody' );
+MESSAGE = document.getElementById( 'TestMessage' );
 
 
     // add post button/dialog
@@ -48,7 +50,13 @@ $( ADD_DIALOG ).dialog({
         ]
     });
 $( addButton ).button();
-addButton.addEventListener( 'click', openAddDialog );
+addButton.addEventListener( 'click', function( event )
+    {
+        // remove the focus off the button, otherwise when the dialog is closed it will set the focus to the button
+    $( addButton ).blur();
+
+    openAddDialog();
+    });
 
 
     // show the list on start
@@ -58,16 +66,30 @@ getAll();
 
 function getAll()
 {
-$.post( '/v1/list/get_all', { api_key: API_KEY }, function( data )
-    {
-        // clear the table
-    BODY.innerHTML = '';
+showLoadingMessage();
 
-    var posts = data[ 'post[]' ];
-
-    for (var a = 0 ; a < posts.length ; a++)
+$.ajax({
+    method: 'POST',
+    url: '/v1/list/get_all',
+    data: { api_key: API_KEY },
+    success: function( data )
         {
-        addToTable( posts[ a ] );
+            // clear the table
+        BODY.innerHTML = '';
+
+        var posts = data[ 'post[]' ];
+
+        for (var a = 0 ; a < posts.length ; a++)
+            {
+            addToTable( posts[ a ] );
+            }
+
+        hideMessage();
+        },
+    error: function( jqXHR, textStatus, errorThrown )
+        {
+        console.log( textStatus, errorThrown );
+        showErrorMessage();
         }
     });
 }
@@ -81,6 +103,8 @@ $( ADD_DIALOG ).dialog( 'open' );
 
 function add( text )
 {
+showLoadingMessage();
+
 $.ajax({
         method: 'POST',
         url: '/v1/list/add',
@@ -91,18 +115,25 @@ $.ajax({
         dataType: 'json',
         success: function( data, textStatus, jqXHR )
             {
-            addToTable( data );
+            addToTable( data, true );
+            hideMessage();
             },
         error: function( jqXHR, textStatus, errorThrown )
             {
             console.log( textStatus, errorThrown );
+            showErrorMessage();
             }
     });
 }
 
 
-function addToTable( info )
+function addToTable( info, inBeginning )
 {
+if ( typeof inBeginning === 'undefined' )
+    {
+    inBeginning = false;
+    }
+
 var tr = document.createElement( 'tr' );
 var text = document.createElement( 'td' );
 var updated = document.createElement( 'td' );
@@ -113,7 +144,33 @@ updated.innerHTML = info.last_updated;
 tr.appendChild( text );
 tr.appendChild( updated );
 
-BODY.appendChild( tr );
+if ( inBeginning )
+    {
+    BODY.insertBefore( tr, BODY.firstElementChild );
+    }
+
+else
+    {
+    BODY.appendChild( tr );
+    }
+}
+
+
+function showLoadingMessage()
+{
+MESSAGE.innerHTML = 'Loading..';
+}
+
+
+function showErrorMessage()
+{
+MESSAGE.innerHTML = 'Error!';
+}
+
+
+function hideMessage()
+{
+MESSAGE.innerHTML = '';
 }
 
 
