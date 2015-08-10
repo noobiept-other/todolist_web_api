@@ -14,6 +14,7 @@ var Test;
 var BODY;
 var MESSAGE;
 var ADD_DIALOG;
+var UPDATE_DIALOG;
 
 
 Test.init = function()
@@ -50,12 +51,34 @@ $( ADD_DIALOG ).dialog({
         ]
     });
 $( addButton ).button();
-addButton.addEventListener( 'click', function( event )
-    {
-        // remove the focus off the button, otherwise when the dialog is closed it will set the focus to the button
-    $( addButton ).blur();
+addButton.addEventListener( 'click', openAddDialog );
 
-    openAddDialog();
+
+    // update dialog
+UPDATE_DIALOG = document.getElementById( 'UpdateDialog' );
+
+$( UPDATE_DIALOG ).dialog({
+        autoOpen: false,
+        modal: true,
+        minWidth: 450,
+        buttons: [
+            {
+                text: 'Update',
+                click: function()
+                    {
+                    update( $( UPDATE_DIALOG ).data( 'row' ), document.getElementById( 'UpdateText' ).value );
+
+                    $( UPDATE_DIALOG ).dialog( 'close' );
+                    }
+            },
+            {
+                text: 'Cancel',
+                click: function()
+                    {
+                    $( UPDATE_DIALOG ).dialog( 'close' );
+                    }
+            }
+        ]
     });
 
 
@@ -64,6 +87,9 @@ getAll();
 };
 
 
+/**
+ * Get all the posts and add them to the table.
+ */
 function getAll()
 {
 showLoadingMessage();
@@ -95,12 +121,36 @@ $.ajax({
 }
 
 
+/**
+ * Open the add dialog, used to add a new post to the list.
+ */
 function openAddDialog()
 {
+    // remove the focus off the button, otherwise when the dialog is closed it will set the focus to the button
+$( '#Add' ).blur();
+
 $( ADD_DIALOG ).dialog( 'open' );
 }
 
 
+/**
+ * Open the update text dialog.
+ */
+function openUpdateDialog( row )
+{
+    // update the text input with the current text of the post
+document.getElementById( 'UpdateText' ).value = row.firstElementChild.innerHTML;
+
+    // save a reference to the row (we'll need it later on to update the table with the changes)
+$( UPDATE_DIALOG ).data( 'row', row );
+$( UPDATE_DIALOG ).dialog( 'open' );
+}
+
+
+/**
+ * Add a new post to the list via the list's api.
+ * Update the table with the new post, if its successful.
+ */
 function add( text )
 {
 showLoadingMessage();
@@ -127,6 +177,38 @@ $.ajax({
 }
 
 
+/**
+ * Update the text of an existing post.
+ */
+function update( row, text )
+{
+showLoadingMessage();
+
+$.ajax({
+        method: 'POST',
+        url: '/v1/list/update',
+        data: {
+            api_key: API_KEY,
+            text: text,
+            id: row.getAttribute( 'data-id' )
+        },
+        success: function( data, textStatus, jqXHR )
+            {
+            updateTableRow( data, row );
+            hideMessage();
+            },
+        error: function( jqXHR, textStatus, errorThrown )
+            {
+            console.log( textStatus, errorThrown );
+            showErrorMessage();
+            }
+    });
+}
+
+
+/**
+ * Add a new row to the table, based on a post information.
+ */
 function addToTable( info, inBeginning )
 {
 if ( typeof inBeginning === 'undefined' )
@@ -137,12 +219,37 @@ if ( typeof inBeginning === 'undefined' )
 var tr = document.createElement( 'tr' );
 var text = document.createElement( 'td' );
 var updated = document.createElement( 'td' );
+var controls = document.createElement( 'td' );
+var updateButton = document.createElement( 'span' );
+var removeButton = document.createElement( 'span' );
+
+tr.setAttribute( 'data-id', info.id );
 
 text.innerHTML = info.text;
 updated.innerHTML = info.last_updated;
+updateButton.title = 'Update Text';
+removeButton.title = 'Remove Post';
 
+$( updateButton ).button({
+    text: false,
+    icons: { primary: 'ui-icon-document-b' }
+});
+$( removeButton ).button({
+    text: false,
+    icons: { primary: 'ui-icon-close' }
+});
+
+updateButton.addEventListener( 'click', function(event)
+    {
+    openUpdateDialog( tr );
+    });
+
+
+controls.appendChild( updateButton );
+controls.appendChild( removeButton );
 tr.appendChild( text );
 tr.appendChild( updated );
+tr.appendChild( controls );
 
 if ( inBeginning )
     {
@@ -156,18 +263,40 @@ else
 }
 
 
+/**
+ * Update a table row with the new information.
+ */
+function updateTableRow( info, row )
+{
+var text = row.firstElementChild;
+var lastUpdated = text.nextElementSibling;
+
+text.innerHTML = info.text;
+lastUpdated.innerHTML = info.last_updated;
+}
+
+
+/**
+ * Show a loading message.
+ */
 function showLoadingMessage()
 {
 MESSAGE.innerHTML = 'Loading..';
 }
 
 
+/**
+ * Show an error message.
+ */
 function showErrorMessage()
 {
 MESSAGE.innerHTML = 'Error!';
 }
 
 
+/**
+ * Hide the message element.
+ */
 function hideMessage()
 {
 MESSAGE.innerHTML = '';

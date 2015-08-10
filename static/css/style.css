@@ -126,3 +126,11 @@ h4
     background-color: aliceblue;
     text-align: center;
     }
+
+
+    /* Test page */
+
+#ListBody .ui-button-icon-only
+    {
+    width: auto;
+    }
