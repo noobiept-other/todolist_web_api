@@ -313,7 +313,8 @@ def delete_multiple( request ):
     if isinstance( posts, HttpResponse ):
         return posts
 
-    posts.delete()
+    for post in posts:
+        post.delete()
 
     return HttpResponse( status= 200 )
 
@@ -439,9 +440,12 @@ def _get_post_list( request ):
         except ValueError:
             return HttpResponseBadRequest( "Invalid 'id[]' argument." )
 
-    posts = user.posts.filter( pk__in= intIds )
+    posts = user.posts.in_bulk( intIds )
 
     if not posts:
         return HttpResponseBadRequest( "Invalid 'id[]' argument." )
 
-    return posts
+        # make sure the posts are in the same order as the ids
+    sortedPosts = [ posts[ postId ] for postId in intIds if postId in posts ]
+
+    return sortedPosts

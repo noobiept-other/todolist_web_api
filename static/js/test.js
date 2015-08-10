@@ -155,6 +155,9 @@ $.ajax({
  */
 function openAddDialog()
 {
+    // clear the text from previous calls
+document.getElementById( 'AddText' ).value = '';
+
     // remove the focus off the button, otherwise when the dialog is closed it will set the focus to the button
 $( '#Add' ).blur();
 

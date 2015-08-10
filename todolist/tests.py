@@ -248,6 +248,14 @@ class TodolistTest( TestCase ):
             })
         self.assertEqual( update.status_code, 400 )
 
+            # 'id[]' is an invalid type
+        update = self.client.post( self.update_multiple_url,
+            {
+                'api_key': self.api_key,
+                'id[]': [ 1, 'asd' ]
+            })
+        self.assertEqual( update.status_code, 400 )
+
 
     def test_update_multiple(self):
         text = [ 'one', 'two', 'three' ]

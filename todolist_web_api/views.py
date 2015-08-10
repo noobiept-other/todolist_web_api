@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
+from todolist_web_api import utilities
+
 
 def show_help( request ):
     """
@@ -9,6 +11,7 @@ def show_help( request ):
     context = {
         'domain': request.get_host()
     }
+    utilities.get_message( request, context )
 
     return render( request, 'help.html', context )
 
