@@ -15,6 +15,7 @@ var BODY;
 var MESSAGE;
 var ADD_DIALOG;
 var UPDATE_DIALOG;
+var REMOVE_DIALOG;
 
 
 Test.init = function()
@@ -36,7 +37,7 @@ $( ADD_DIALOG ).dialog({
                 text: 'Add',
                 click: function()
                     {
-                    add( document.getElementById( 'AddText' ).value );
+                    addPost( document.getElementById( 'AddText' ).value );
 
                     $( ADD_DIALOG ).dialog( 'close' );
                     }
@@ -66,7 +67,7 @@ $( UPDATE_DIALOG ).dialog({
                 text: 'Update',
                 click: function()
                     {
-                    update( $( UPDATE_DIALOG ).data( 'row' ), document.getElementById( 'UpdateText' ).value );
+                    updatePost( $( UPDATE_DIALOG ).data( 'row' ), document.getElementById( 'UpdateText' ).value );
 
                     $( UPDATE_DIALOG ).dialog( 'close' );
                     }
@@ -76,6 +77,34 @@ $( UPDATE_DIALOG ).dialog({
                 click: function()
                     {
                     $( UPDATE_DIALOG ).dialog( 'close' );
+                    }
+            }
+        ]
+    });
+
+
+    // remove dialog
+REMOVE_DIALOG = document.getElementById( 'RemoveDialog' );
+
+$( REMOVE_DIALOG ).dialog({
+        autoOpen: false,
+        modal: true,
+        minWidth: 450,
+        buttons: [
+            {
+                text: 'Remove',
+                click: function()
+                    {
+                    deletePost( $( REMOVE_DIALOG ).data( 'row' ) );
+
+                    $( REMOVE_DIALOG ).dialog( 'close' );
+                    }
+            },
+            {
+                text: 'Cancel',
+                click: function()
+                    {
+                    $( REMOVE_DIALOG ).dialog( 'close' );
                     }
             }
         ]
@@ -148,10 +177,23 @@ $( UPDATE_DIALOG ).dialog( 'open' );
 
 
 /**
+ * Open the remove post dialog.
+ */
+function openRemoveDialog( row )
+{
+    // show the text of the post to be removed
+document.getElementById( 'RemoveText' ).innerHTML = row.firstElementChild.innerHTML;
+
+$( REMOVE_DIALOG ).data( 'row', row );
+$( REMOVE_DIALOG ).dialog( 'open' );
+}
+
+
+/**
  * Add a new post to the list via the list's api.
  * Update the table with the new post, if its successful.
  */
-function add( text )
+function addPost( text )
 {
 showLoadingMessage();
 
@@ -180,7 +222,7 @@ $.ajax({
 /**
  * Update the text of an existing post.
  */
-function update( row, text )
+function updatePost( row, text )
 {
 showLoadingMessage();
 
@@ -195,6 +237,34 @@ $.ajax({
         success: function( data, textStatus, jqXHR )
             {
             updateTableRow( data, row );
+            hideMessage();
+            },
+        error: function( jqXHR, textStatus, errorThrown )
+            {
+            console.log( textStatus, errorThrown );
+            showErrorMessage();
+            }
+    });
+}
+
+
+/**
+ * Delete the selected post from the list/table.
+ */
+function deletePost( row )
+{
+showLoadingMessage();
+
+$.ajax({
+        method: 'POST',
+        url: '/v1/list/delete',
+        data: {
+            api_key: API_KEY,
+            id: row.getAttribute( 'data-id' )
+        },
+        success: function( data, textStatus, jqXHR )
+            {
+            removeTableRow( row );
             hideMessage();
             },
         error: function( jqXHR, textStatus, errorThrown )
@@ -239,9 +309,13 @@ $( removeButton ).button({
     icons: { primary: 'ui-icon-close' }
 });
 
-updateButton.addEventListener( 'click', function(event)
+updateButton.addEventListener( 'click', function()
     {
     openUpdateDialog( tr );
+    });
+removeButton.addEventListener( 'click', function()
+    {
+    openRemoveDialog( tr );
     });
 
 
@@ -273,6 +347,15 @@ var lastUpdated = text.nextElementSibling;
 
 text.innerHTML = info.text;
 lastUpdated.innerHTML = info.last_updated;
+}
+
+
+/**
+ * Remove a table row.
+ */
+function removeTableRow( row )
+{
+row.parentNode.removeChild( row );
 }
 
 
