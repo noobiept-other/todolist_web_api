@@ -37,7 +37,7 @@ else:
 
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [ 'todolist-web-api.herokuapp.com', 'todolist-web-api.heroku.com' ]
 
 
 INSTALLED_APPS = (

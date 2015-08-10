@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from todolist.models import Post
+from todolist.models import Post, TEXT_MAX_LENGTH
 from todolist.serializers import post_serializer
 from todolist.decorators import post_only
 
@@ -19,7 +19,8 @@ def info( request ):
 
         returns = {
             'username': str,
-            'post_count': int
+            'post_count': int,
+            'text_max_length': int
         }
     """
     user = _get_user( request )
@@ -29,7 +30,8 @@ def info( request ):
 
     response = {
         'username': user.username,
-        'post_count': user.posts.count()
+        'post_count': user.posts.count(),
+        'text_max_length': TEXT_MAX_LENGTH
     }
 
     return JsonResponse( response, status= 200 )

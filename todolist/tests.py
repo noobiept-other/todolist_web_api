@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 
 import json
 
+from todolist.models import TEXT_MAX_LENGTH
+
 
 class TodolistTest( TestCase ):
     def setUp(self):
@@ -89,6 +91,7 @@ class TodolistTest( TestCase ):
 
         self.assertEqual( info[ 'post_count' ], 1 )
         self.assertEqual( info[ 'username' ], self.user.username )
+        self.assertEqual( info[ 'text_max_length' ], TEXT_MAX_LENGTH )
 
 
     def test_add_bad_request(self):

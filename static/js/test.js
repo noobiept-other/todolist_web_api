@@ -16,6 +16,7 @@ var MESSAGE;
 var ADD_DIALOG;
 var UPDATE_DIALOG;
 var REMOVE_DIALOG;
+var TEXT_MAX_LENGTH = 0;
 
 
 Test.init = function()
@@ -111,9 +112,42 @@ $( REMOVE_DIALOG ).dialog({
     });
 
 
-    // show the list on start
-getAll();
+    // get the maximum length of the text
+getInfo();
 };
+
+
+/**
+ * Get some information about the list (maximum length of the text).
+ * Show the list after.
+ */
+function getInfo( callback )
+{
+showLoadingMessage();
+
+$.ajax({
+        method: 'POST',
+        url: '/v1/list/info',
+        data: { api_key: API_KEY },
+        success: function( data )
+            {
+            TEXT_MAX_LENGTH = data[ 'text_max_length' ];
+
+                // update the 'add' and 'update' dialog input elements
+            document.getElementById( 'AddText' ).setAttribute( 'maxlength', TEXT_MAX_LENGTH );
+            document.getElementById( 'UpdateText' ).setAttribute( 'maxlength', TEXT_MAX_LENGTH );
+
+                // load the list
+            getAll();
+            hideMessage();
+            },
+        error: function( jqXHR, textStatus, errorThrown )
+            {
+            console.log( textStatus, errorThrown );
+            showErrorMessage();
+            }
+    });
+}
 
 
 /**
