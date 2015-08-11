@@ -4,6 +4,7 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.conf import settings
 
 import todolist.urls
 import todolist.views
@@ -21,3 +22,9 @@ urlpatterns = [
     url( r'^admin/', include( admin.site.urls ) ),
 ]
 
+
+    # Serve static files when debug false
+if not settings.DEBUG:
+    urlpatterns += [
+        url( r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT } ),
+    ]
