@@ -1,7 +1,5 @@
 A todo list program, where you can add/remove/etc posts through a web api.
 
-You can try it out here: [http://todolist-web-api.herokuapp.com](http://todolist-web-api.herokuapp.com)
-
 
 Commands
 ========
